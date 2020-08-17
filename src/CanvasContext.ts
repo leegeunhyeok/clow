@@ -35,7 +35,6 @@ export default class CanvasContext {
   }
 
   private callEventHandler(eventType: string, value?: any) {
-    console.log('!!');
     const handler = this._onEvent[eventType];
     handler && handler(value);
   }
@@ -86,8 +85,7 @@ export default class CanvasContext {
     } else if (this.connectingFrom.isConnectable(module)) {
       this.connectingTo = module;
     } else {
-      console.log('Type not match');
-      // return;
+      this.callEventHandler('notconnectable');
     }
 
     if (this.connectingFrom && this.connectingTo) {
