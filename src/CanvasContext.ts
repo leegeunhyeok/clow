@@ -1,5 +1,6 @@
 import { SVG, Svg, G } from '@svgdotjs/svg.js';
 import CrawlyModule from './modules/common/CrawlyModule';
+import ModuleConnector from './modules/common/Connector';
 
 interface Point {
   x: number;
@@ -15,6 +16,7 @@ export default class CanvasContext {
   private svg?: Svg;
   private cursorPosition: Point = { x: 0, y: 0 };
   private _connectorGroup?: G;
+  private connectorShadow?: G;
   private _moduleGroup?: G;
   private _onEvent: ContextEventHandlerStore = {};
   private modules: CrawlyModule[] = [];
@@ -46,6 +48,7 @@ export default class CanvasContext {
     this.svg.on('mousemove', (event: MouseEvent) => {
       const { x, y } = event;
       this.cursorPosition = { x, y };
+      this.connectorShadow && this.connectorShadow.findOne('line').attr({ x2: x, y2: y });
     });
   }
 
@@ -73,6 +76,7 @@ export default class CanvasContext {
   connecting(state: boolean) {
     this.isConnecting = state;
     if (!state) {
+      this.connectorShadow = void (this.connectorShadow && this.connectorShadow.remove());
       this.connectingFrom && (this.connectingFrom.inConnectRelation = false);
       this.connectingTo && (this.connectingTo.inConnectRelation = false);
     }
@@ -81,6 +85,22 @@ export default class CanvasContext {
 
   connectRelation(module: CrawlyModule) {
     if (!this.connectingFrom) {
+      const connectorGroup = this.getConnectorGroup();
+      const lineGroup = connectorGroup.group();
+      const pos = {
+        x1: module.getGraphic().cx(),
+        y1: module.getGraphic().cy(),
+        x2: 0,
+        y2: 0,
+      };
+      lineGroup
+        .line(pos.x1, pos.y1, pos.x2, pos.y2)
+        .stroke({ color: '#ddd', width: ModuleConnector.LINE_WIDTH, linecap: 'round' });
+      lineGroup
+        .circle(ModuleConnector.HEAD_SIZE)
+        .attr({ cx: pos.x1, cy: pos.y1 })
+        .attr({ fill: module.color });
+      this.connectorShadow = lineGroup;
       this.connectingFrom = module;
     } else if (this.connectingFrom.isConnectable(module)) {
       this.connectingTo = module;
