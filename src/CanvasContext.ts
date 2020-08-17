@@ -90,8 +90,8 @@ export default class CanvasContext {
       const pos = {
         x1: module.getGraphic().cx(),
         y1: module.getGraphic().cy(),
-        x2: 0,
-        y2: 0,
+        x2: this.cursorPosition.x,
+        y2: this.cursorPosition.y,
       };
       lineGroup
         .line(pos.x1, pos.y1, pos.x2, pos.y2)
