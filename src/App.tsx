@@ -22,6 +22,13 @@ const App = () => {
     const [m1, m2, m3] = modules;
     m1.connect(m2);
     m1.connect(m3);
+
+    window.addEventListener('keyup', (event: KeyboardEvent) => {
+      console.log(event);
+      if (event.key === 'Escape') {
+        canvasContext.connecting(false);
+      }
+    });
   }, []);
 
   return (
