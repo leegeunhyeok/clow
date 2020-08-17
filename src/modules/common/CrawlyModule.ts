@@ -11,6 +11,7 @@ export default class CrawlyModule {
   public width: number = 0;
   public height: number = 0;
   public color: string = '#ffffff';
+  public inConnectRelation: boolean = false;
   public inputType: DataTypes | DataTypes[];
   public outputType: DataTypes | DataTypes[];
   protected context: CanvasContext;
@@ -34,7 +35,7 @@ export default class CrawlyModule {
     this.outputType = DataTypes.NULL;
   }
 
-  protected init() {
+  init() {
     const self = this;
     this.g = this.context
       .getModuleGroup()
@@ -44,6 +45,10 @@ export default class CrawlyModule {
       .attr({ x: this.x, y: this.y })
       .draggable();
 
+    this.g.on('beforedrag', (event: MouseEvent) => {
+      this.context.isConnecting && event.preventDefault();
+    });
+
     this.g.on('dragmove,dragend', function (this: Graphics) {
       self.connectors.forEach((connector) => connector.update());
       self.x = this.cx();
@@ -52,6 +57,23 @@ export default class CrawlyModule {
         `%cObj (${self.x}, ${self.y})`,
         `padding:0 5px;border-radius:4px;color:#fff;background-color:${self.color};`,
       );
+    });
+
+    this.g.on('mouseover', function (this: Graphics) {
+      if (self.context.isConnecting) {
+        this.transform({ scale: 1.1 });
+      }
+    });
+
+    this.g.on('mouseleave', function (this: Graphics) {
+      this.transform({ scale: 1 });
+    });
+
+    this.g.on('click', () => {
+      if (this.context.isConnecting && !this.inConnectRelation) {
+        this.inConnectRelation = true;
+        this.context.connectRelation(this);
+      }
     });
   }
 
@@ -79,7 +101,6 @@ export default class CrawlyModule {
     const connector = new ModuleConnector(this, to);
     this.connectors.push(connector);
     to.connectorFrom(connector);
-    console.log(this.isConnectable(to));
   }
 
   connectorFrom(connector: ModuleConnector) {
