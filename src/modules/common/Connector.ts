@@ -1,6 +1,6 @@
 import CanvasContext from '../../CanvasContext';
 import { G } from '@svgdotjs/svg.js';
-import Module from './CrawlyModule';
+import CrawlyModule from './CrawlyModule';
 
 interface ConnectorLinePosition {
   x1: number;
@@ -12,11 +12,11 @@ interface ConnectorLinePosition {
 class ModuleConnector {
   public static HEAD_SIZE = 20;
   public static LINE_WIDTH = 3;
-  protected from: Module;
-  protected to: Module;
+  protected from: CrawlyModule;
+  protected to: CrawlyModule;
   protected g: G;
 
-  constructor(from: Module, to: Module) {
+  constructor(from: CrawlyModule, to: CrawlyModule) {
     this.from = from;
     this.to = to;
     const connectorGroup = CanvasContext.getInstance().getConnectorGroup();
