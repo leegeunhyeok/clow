@@ -52,6 +52,10 @@ export default class CanvasContext {
     });
   }
 
+  getSvg() {
+    return this.svg as Svg;
+  }
+
   getCursorPoint() {
     return this.cursorPosition;
   }

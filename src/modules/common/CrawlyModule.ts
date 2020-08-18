@@ -75,6 +75,9 @@ export default class CrawlyModule {
         this.context.connectRelation(this);
       }
     });
+
+    // TODO
+    const obj = this.context.getSvg().foreignObject(10, 10);
   }
 
   getGraphic() {
