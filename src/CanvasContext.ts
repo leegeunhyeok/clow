@@ -99,7 +99,14 @@ export default class CanvasContext {
       };
       lineGroup
         .line(pos.x1, pos.y1, pos.x2, pos.y2)
-        .stroke({ color: '#ddd', width: ModuleConnector.LINE_WIDTH, linecap: 'round' });
+        .stroke({
+          color: '#dddddd',
+          width: ModuleConnector.LINE_WIDTH,
+          linecap: 'round',
+        })
+        .attr({
+          'stroke-dasharray': '5,5',
+        });
       lineGroup
         .circle(ModuleConnector.HEAD_SIZE)
         .attr({ cx: pos.x1, cy: pos.y1 })
