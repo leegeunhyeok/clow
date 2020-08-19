@@ -1,49 +1,64 @@
-import { Rect, Circle, Ellipse } from '@svgdotjs/svg.js';
+import { SVG, G, Rect, Circle, Ellipse } from '@svgdotjs/svg.js';
 import CanvasContext from '../../CanvasContext';
 import ModuleConnector from './Connector';
 import DataTypes from './Types';
 
+interface UIComponent {
+  template: string;
+  row: number;
+  column: number;
+  width: number;
+  height: number;
+}
+
 export type Graphics = Rect | Circle | Ellipse;
 
 export default class CrawlyModule {
+  public static CELL_SIZE = 40;
+  public static RENDER_PADDING = 5;
   public x: number = 0;
   public y: number = 0;
-  public width: number = 0;
-  public height: number = 0;
+  public column: number = 0;
+  public row: number = 0;
   public color: string = '#ffffff';
   public inConnectRelation: boolean = false;
   public inputType: DataTypes | DataTypes[];
   public outputType: DataTypes | DataTypes[];
   protected context: CanvasContext;
-  protected g?: Graphics;
+  protected g: G;
+  protected graphic?: Graphics;
   protected connectors: ModuleConnector[] = [];
+  private components: UIComponent[] = [];
 
-  constructor(
-    x: number = 0,
-    y: number = 0,
-    width: number = 160,
-    height: number = 80,
-    color: string = '#ffffff',
-  ) {
+  constructor(x = 0, y = 0) {
     this.context = CanvasContext.getInstance();
+    this.g = this.context.getModuleGroup().group().draggable();
     this.x = x;
     this.y = y;
-    this.width = width;
-    this.height = height;
-    this.color = color;
     this.inputType = DataTypes.NULL;
     this.outputType = DataTypes.NULL;
   }
 
+  addComponent(template: string, row: number, column: number, width: number, height: number) {
+    this.components.push({
+      template,
+      row,
+      column,
+      width,
+      height,
+    });
+  }
+
   init() {
     const self = this;
-    this.g = this.context
-      .getModuleGroup()
-      .rect(this.width, this.height)
-      .radius(16)
-      .fill(this.color)
+    this.graphic = this.g
+      .rect(
+        this.column * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2,
+        this.row * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2,
+      )
       .attr({ x: this.x, y: this.y })
-      .draggable();
+      .radius(8)
+      .fill(this.color);
 
     this.g.on('beforedrag', (event: MouseEvent) => {
       this.context.isConnecting && event.preventDefault();
@@ -59,29 +74,58 @@ export default class CrawlyModule {
       );
     });
 
-    this.g.on('mouseover', function (this: Graphics) {
+    this.graphic.on('mouseover', function (this: Graphics) {
       if (self.context.isConnecting) {
         this.transform({ scale: 1.1 });
       }
     });
 
-    this.g.on('mouseleave', function (this: Graphics) {
+    this.graphic.on('mouseleave', function (this: Graphics) {
       this.transform({ scale: 1 });
     });
 
-    this.g.on('click', () => {
+    this.graphic.on('click', () => {
       if (this.context.isConnecting && !this.inConnectRelation) {
         this.inConnectRelation = true;
         this.context.connectRelation(this);
       }
     });
 
-    // TODO
-    const obj = this.context.getSvg().foreignObject(10, 10);
+    const fo = this.g.foreignObject(
+      this.column * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2,
+      this.row * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2,
+    );
+
+    let html = '';
+    for (const component of this.components) {
+      const el = SVG(component.template).attr({
+        style: `
+          display:block;
+          position:absolute;
+          top:${component.row * CrawlyModule.CELL_SIZE}px;
+          left:${component.column * CrawlyModule.CELL_SIZE}px;
+          width:${component.width * CrawlyModule.CELL_SIZE}px;
+          height:${component.height * CrawlyModule.CELL_SIZE}px;
+        `.replace(/\s/g, ''),
+      });
+      html += el.node.outerHTML;
+    }
+
+    const wrap = SVG(`<div>${html}</div>`).attr({
+      x: 0,
+      y: 0,
+      style: `
+        position:relative;
+        margin:${CrawlyModule.RENDER_PADDING}px;
+        width:${this.column * CrawlyModule.CELL_SIZE}px;
+        height:${this.row * CrawlyModule.CELL_SIZE}px;
+      `.replace(/\s/g, ''),
+    });
+    fo.add(wrap);
   }
 
   getGraphic() {
-    return this.g as Graphics;
+    return this.graphic as Graphics;
   }
 
   isConnectable(to: CrawlyModule) {

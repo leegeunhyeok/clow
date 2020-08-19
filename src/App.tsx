@@ -14,9 +14,9 @@ const App = () => {
     const canvasContext = CanvasContext.getInstance();
     canvasContext.init(canvas.current as HTMLElement);
     const modules = [
-      new Pager(350, 200, '#e91e63'),
-      new Pager(100, 250, '#1e90ff'),
-      new Pager(250, 50, '#ffe577'),
+      new Pager(2, 4, '#e91e63'),
+      new Pager(2, 3, '#1e90ff'),
+      new Pager(1, 6, '#ffe577'),
     ];
     modules.forEach((x) => canvasContext.registModule(x));
     const [m1, m2, m3] = modules;

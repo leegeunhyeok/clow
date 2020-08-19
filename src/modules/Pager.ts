@@ -1,14 +1,15 @@
 import CrawlyModule from './common/CrawlyModule';
 import DataTypes from './common/Types';
 
-export default class PagerModule extends CrawlyModule {
+export default class Pager extends CrawlyModule {
   inputType = DataTypes.STRING;
   outputType = DataTypes.STRING;
 
-  constructor(x: number = 0, y: number, color: string) {
+  constructor(row: number, column: number, color: string) {
     super();
-    this.x = x;
-    this.y = y;
+    this.row = row;
+    this.column = column;
     this.color = color;
+    this.addComponent('<input type="text">', 0, 1, 1, 1);
   }
 }
