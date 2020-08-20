@@ -20,6 +20,7 @@ export default class CanvasContext {
   private _moduleGroup?: G;
   private _onEvent: ContextEventHandlerStore = {};
   private modules: CrawlyModule[] = [];
+  public isMoving: boolean = false;
   public isConnecting: boolean = false;
   public connectingFrom?: CrawlyModule | null;
   public connectingTo?: CrawlyModule | null;
@@ -85,6 +86,11 @@ export default class CanvasContext {
       this.connectingTo && (this.connectingTo.inConnectRelation = false);
     }
     this.callEventHandler('connectingstatechange', state);
+  }
+
+  moving(state: boolean) {
+    this.isMoving = state;
+    this.callEventHandler('movingstatechange', state);
   }
 
   connectRelation(module: CrawlyModule) {
