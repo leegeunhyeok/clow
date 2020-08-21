@@ -10,6 +10,41 @@ export default class Pager extends CrawlyModule {
     this.row = row;
     this.column = column;
     this.color = color;
-    this.addComponent('<input type="text">', 0, 1, 1, 1);
+    this.addComponent(
+      {
+        type: 'input',
+        attr: {
+          type: 'text',
+        },
+        on: {
+          click: this.onClick,
+          change: this.onChange,
+          mouseover: this.onChange,
+        },
+      },
+      0,
+      2,
+      6,
+      2,
+    );
+  }
+
+  onClick() {
+    console.log('click!');
+  }
+
+  onChange(event: InputEvent) {
+    console.log((event.target as HTMLInputElement).value);
   }
 }
+
+/**
+ * 
+interface DOMConfig {
+  type: string;
+  text?: string;
+  attr?: { [key: string]: string };
+  on?: { [key: string]: Function };
+  children?: DOMConfig[];
+}
+ */

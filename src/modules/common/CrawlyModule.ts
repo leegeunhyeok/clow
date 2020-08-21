@@ -3,8 +3,16 @@ import CanvasContext from '../../CanvasContext';
 import ModuleConnector from './Connector';
 import DataTypes from './Types';
 
+interface DOMConfig {
+  type: string;
+  text?: string;
+  attr?: { [key: string]: string };
+  on?: { [key: string]: Function };
+  children?: DOMConfig[];
+}
+
 interface UIComponent {
-  template: string;
+  template: DOMConfig;
   row: number;
   column: number;
   width: number;
@@ -14,10 +22,10 @@ interface UIComponent {
 export type Graphics = Rect | Circle | Ellipse;
 
 export default class CrawlyModule {
-  public static CELL_SIZE = 40;
+  public static CELL_SIZE = 10;
   public static RENDER_PADDING = 5;
-  public x: number = 0;
-  public y: number = 0;
+  public x: number = 100;
+  public y: number = 100;
   public column: number = 0;
   public row: number = 0;
   public color: string = '#ffffff';
@@ -29,17 +37,18 @@ export default class CrawlyModule {
   protected graphic?: Graphics;
   protected connectors: ModuleConnector[] = [];
   private components: UIComponent[] = [];
+  public drag = false;
 
-  constructor(x = 0, y = 0) {
+  constructor(x = 100, y = 100) {
     this.context = CanvasContext.getInstance();
-    this.g = this.context.getModuleGroup().group().draggable();
     this.x = x;
     this.y = y;
+    this.g = this.context.getSvg().group();
     this.inputType = DataTypes.NULL;
     this.outputType = DataTypes.NULL;
   }
 
-  addComponent(template: string, row: number, column: number, width: number, height: number) {
+  addComponent(template: DOMConfig, row: number, column: number, width: number, height: number) {
     this.components.push({
       template,
       row,
@@ -56,22 +65,36 @@ export default class CrawlyModule {
         this.column * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2,
         this.row * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2,
       )
-      .attr({ x: this.x, y: this.y })
       .radius(8)
       .fill(this.color);
 
-    this.g.on('beforedrag', (event: MouseEvent) => {
-      this.context.isConnecting && event.preventDefault();
+    this.g.on('mousedown', () => {
+      this.drag = true;
+    });
+
+    this.g.on('mousemove', (event: MouseEvent) => {
+      if (!this.drag) return;
+      this.x = event.x;
+      this.y = event.y;
+      this.update();
+      this.connectors.forEach((connector) => connector.update());
+      console.log(
+        `%cObj (${this.x}, ${this.y})`,
+        `padding:0 5px;border-radius:4px;color:#fff;background-color:${this.color};`,
+      );
+    });
+
+    this.g.on('mouseup', () => {
+      this.drag = false;
     });
 
     this.g.on('dragmove,dragend', function (this: Graphics) {
-      self.connectors.forEach((connector) => connector.update());
       self.x = this.cx();
       self.y = this.cy();
-      console.log(
-        `%cObj (${self.x}, ${self.y})`,
-        `padding:0 5px;border-radius:4px;color:#fff;background-color:${self.color};`,
-      );
+    });
+
+    this.g.on('mousedown', () => {
+      console.log('over');
     });
 
     this.graphic.on('mouseover', function (this: Graphics) {
@@ -91,37 +114,98 @@ export default class CrawlyModule {
       }
     });
 
-    const fo = this.g.foreignObject(
-      this.column * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2,
-      this.row * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2,
+    const foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+    foreignObject.setAttribute(
+      'width',
+      (this.column * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2).toString(),
+    );
+    foreignObject.setAttribute(
+      'height',
+      (this.row * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2).toString(),
     );
 
-    let html = '';
+    const componentList = [];
     for (const component of this.components) {
-      const el = SVG(component.template).attr({
-        style: `
-          display:block;
-          position:absolute;
-          top:${component.row * CrawlyModule.CELL_SIZE}px;
-          left:${component.column * CrawlyModule.CELL_SIZE}px;
-          width:${component.width * CrawlyModule.CELL_SIZE}px;
-          height:${component.height * CrawlyModule.CELL_SIZE}px;
-        `.replace(/\s/g, ''),
-      });
-      html += el.node.outerHTML;
+      const el = this.createElementFromDOMConfig(component.template);
+      el.setAttribute(
+        'style',
+        `
+        display:block;
+        position:absolute;
+        top:${component.row * CrawlyModule.CELL_SIZE}px;
+        left:${component.column * CrawlyModule.CELL_SIZE}px;
+        width:${component.width * CrawlyModule.CELL_SIZE}px;
+        height:${component.height * CrawlyModule.CELL_SIZE}px;
+      `.replace(/\s/g, ''),
+      );
+
+      componentList.push(el);
     }
 
-    const wrap = SVG(`<div>${html}</div>`).attr({
-      x: 0,
-      y: 0,
-      style: `
-        position:relative;
-        margin:${CrawlyModule.RENDER_PADDING}px;
-        width:${this.column * CrawlyModule.CELL_SIZE}px;
-        height:${this.row * CrawlyModule.CELL_SIZE}px;
-      `.replace(/\s/g, ''),
+    const wrap = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
+    wrap.setAttribute(
+      'style',
+      `
+      position:relative;
+      margin:${CrawlyModule.RENDER_PADDING}px;
+      width:0px;
+      height:0px;
+    `.replace(/\s/g, ''),
+    );
+
+    for (const componentEl of componentList) {
+      wrap.appendChild(componentEl);
+    }
+
+    foreignObject.appendChild(wrap);
+    this.g.node.appendChild(foreignObject);
+    this.update();
+  }
+
+  update() {
+    const { cx, cy } = this.getCenterPosition();
+    const x = this.x - (this.graphic as Graphics).width() / 2;
+    const y = this.y - (this.graphic as Graphics).height() / 2;
+    this.g.attr({
+      transform: `translate(${x},${y})`,
     });
-    fo.add(wrap);
+  }
+
+  private createElementFromDOMConfig(config: DOMConfig) {
+    const el = document.createElement(config.type);
+
+    if (config.text) {
+      el.appendChild(document.createTextNode(config.text));
+    }
+
+    if (config.attr) {
+      for (const key in config.attr) {
+        el.setAttribute(key, config.attr[key]);
+      }
+    }
+
+    if (config.on) {
+      for (const event in config.on) {
+        el.addEventListener(event, (e: Event) => {
+          console.log('stop!');
+          e.stopImmediatePropagation();
+          config.on && config.on[event](e);
+        });
+      }
+    }
+
+    if (config.children && config.children.length > 0) {
+      config.children.map(this.createElementFromDOMConfig).forEach(el.appendChild);
+    }
+
+    return el;
+  }
+
+  getCenterPosition() {
+    return {
+      cx: this.x - (this.graphic as Graphics).width() / 2,
+      cy: this.y - (this.graphic as Graphics).height() / 2,
+    };
   }
 
   getGraphic() {

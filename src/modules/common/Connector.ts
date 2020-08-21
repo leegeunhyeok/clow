@@ -41,11 +41,13 @@ class ModuleConnector {
   }
 
   private getConnectorPosition(): ConnectorLinePosition {
+    const fromPos = this.from.getCenterPosition();
+    const toPos = this.to.getCenterPosition();
     const pos: ConnectorLinePosition = {
-      x1: this.from.getGraphic().cx(),
-      y1: this.from.getGraphic().cy(),
-      x2: this.to.getGraphic().cx(),
-      y2: this.to.getGraphic().cy(),
+      x1: fromPos.cx,
+      y1: fromPos.cy,
+      x2: toPos.cx,
+      y2: toPos.cy,
     };
 
     const THRESHOLD = 45; // 45deg based. -> Vertical, Horizontal

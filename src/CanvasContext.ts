@@ -15,12 +15,10 @@ export default class CanvasContext {
   private static instance: CanvasContext;
   private svg?: Svg;
   private cursorPosition: Point = { x: 0, y: 0 };
-  private _connectorGroup?: G;
+  private connectorGroup?: G;
   private connectorShadow?: G;
-  private _moduleGroup?: G;
-  private _onEvent: ContextEventHandlerStore = {};
+  private onEvent: ContextEventHandlerStore = {};
   private modules: CrawlyModule[] = [];
-  public isMoving: boolean = false;
   public isConnecting: boolean = false;
   public connectingFrom?: CrawlyModule | null;
   public connectingTo?: CrawlyModule | null;
@@ -38,14 +36,13 @@ export default class CanvasContext {
   }
 
   private callEventHandler(eventType: string, value?: any) {
-    const handler = this._onEvent[eventType];
+    const handler = this.onEvent[eventType];
     handler && handler(value);
   }
 
   init(container: HTMLElement) {
     this.svg = SVG().addTo(container).size('100%', '100vh');
-    this._connectorGroup = this.svg.group();
-    this._moduleGroup = this.svg.group();
+    this.connectorGroup = this.svg.group();
     this.svg.on('mousemove', (event: MouseEvent) => {
       const { x, y } = event;
       this.cursorPosition = { x, y };
@@ -62,11 +59,7 @@ export default class CanvasContext {
   }
 
   getConnectorGroup() {
-    return this._connectorGroup as G;
-  }
-
-  getModuleGroup() {
-    return this._moduleGroup as G;
+    return this.connectorGroup as G;
   }
 
   registModule(module: CrawlyModule) {
@@ -86,11 +79,6 @@ export default class CanvasContext {
       this.connectingTo && (this.connectingTo.inConnectRelation = false);
     }
     this.callEventHandler('connectingstatechange', state);
-  }
-
-  moving(state: boolean) {
-    this.isMoving = state;
-    this.callEventHandler('movingstatechange', state);
   }
 
   connectRelation(module: CrawlyModule) {
@@ -133,6 +121,6 @@ export default class CanvasContext {
   }
 
   on(eventType: string, f: Function) {
-    this._onEvent[eventType] = f;
+    this.onEvent[eventType] = f;
   }
 }
