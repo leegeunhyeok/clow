@@ -1,5 +1,4 @@
 import React, { useRef, useEffect } from 'react';
-import '@svgdotjs/svg.draggable.js';
 import './App.css';
 
 import Toolbar from './components/Toolbar';
@@ -14,9 +13,9 @@ const App = () => {
     const canvasContext = CanvasContext.getInstance();
     canvasContext.init(canvas.current as HTMLElement);
     const modules = [
-      new Pager(2, 4, '#e91e63'),
-      new Pager(2, 3, '#1e90ff'),
-      new Pager(1, 6, '#ffe577'),
+      new Pager(6, 10, '#e91e63'),
+      new Pager(4, 12, '#1e90ff'),
+      new Pager(4, 10, '#ffe577'),
     ];
     modules.forEach((x) => canvasContext.registModule(x));
     const [m1, m2, m3] = modules;
@@ -24,7 +23,6 @@ const App = () => {
     m1.connect(m3);
 
     window.addEventListener('keyup', (event: KeyboardEvent) => {
-      console.log(event);
       if (event.key === 'Escape') {
         canvasContext.connecting(false);
       }
