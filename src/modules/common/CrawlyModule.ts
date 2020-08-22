@@ -28,6 +28,8 @@ export default class CrawlyModule {
   public y: number = 100;
   public column: number = 0;
   public row: number = 0;
+  public width: number = 0;
+  public height: number = 0;
   public color: string = '#ffffff';
   public inConnectRelation: boolean = false;
   public inputType: DataTypes | DataTypes[];
@@ -60,20 +62,21 @@ export default class CrawlyModule {
 
   init() {
     const self = this;
-    this.graphic = this.g
-      .rect(
-        this.column * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2,
-        this.row * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2,
-      )
-      .radius(8)
-      .fill(this.color);
+    this.width = this.column * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2;
+    this.height = this.row * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2;
+    this.graphic = this.g.rect(this.width, this.height).radius(8).fill(this.color);
+    console.log(this.width, this.height);
 
-    this.g.on('mousedown', () => {
+    this.g.on('mousedown', (event: MouseEvent) => {
       this.drag = true;
     });
 
     this.g.on('mousemove', (event: MouseEvent) => {
       if (!this.drag) return;
+      // TODO: Check position
+      // const dim = (event.target as SVGElement).getBoundingClientRect();
+      // const x = event.clientX - dim.left;
+      // const y = event.clientY - dim.top;
       this.x = event.x;
       this.y = event.y;
       this.update();
@@ -84,17 +87,8 @@ export default class CrawlyModule {
       );
     });
 
-    this.g.on('mouseup', () => {
+    this.g.on('mouseup,mouseleave', () => {
       this.drag = false;
-    });
-
-    this.g.on('dragmove,dragend', function (this: Graphics) {
-      self.x = this.cx();
-      self.y = this.cy();
-    });
-
-    this.g.on('mousedown', () => {
-      console.log('over');
     });
 
     this.graphic.on('mouseover', function (this: Graphics) {
@@ -163,9 +157,8 @@ export default class CrawlyModule {
   }
 
   update() {
-    const { cx, cy } = this.getCenterPosition();
-    const x = this.x - (this.graphic as Graphics).width() / 2;
-    const y = this.y - (this.graphic as Graphics).height() / 2;
+    const x = this.x - this.width / 2;
+    const y = this.y - this.height / 2;
     this.g.attr({
       transform: `translate(${x},${y})`,
     });
@@ -187,8 +180,7 @@ export default class CrawlyModule {
     if (config.on) {
       for (const event in config.on) {
         el.addEventListener(event, (e: Event) => {
-          console.log('stop!');
-          e.stopImmediatePropagation();
+          e.stopPropagation();
           config.on && config.on[event](e);
         });
       }
@@ -199,13 +191,6 @@ export default class CrawlyModule {
     }
 
     return el;
-  }
-
-  getCenterPosition() {
-    return {
-      cx: this.x - (this.graphic as Graphics).width() / 2,
-      cy: this.y - (this.graphic as Graphics).height() / 2,
-    };
   }
 
   getGraphic() {
