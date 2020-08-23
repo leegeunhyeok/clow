@@ -1,6 +1,6 @@
 import { SVG, Svg, G } from '@svgdotjs/svg.js';
 import CrawlyModule from './modules/common/CrawlyModule';
-import ModuleConnector from './modules/common/Connector';
+import ModuleConnector from './modules/common/ModuleConnector';
 
 interface Point {
   x: number;
@@ -19,6 +19,7 @@ export default class CanvasContext {
   private connectorShadow?: G;
   private onEvent: ContextEventHandlerStore = {};
   private modules: CrawlyModule[] = [];
+  public focusedModule: CrawlyModule | null = null;
   public isConnecting: boolean = false;
   public connectingFrom?: CrawlyModule | null;
   public connectingTo?: CrawlyModule | null;
@@ -41,12 +42,34 @@ export default class CanvasContext {
   }
 
   init(container: HTMLElement) {
+    let waiting = false; // for throttle.
     this.svg = SVG().addTo(container).size('100%', '100vh');
     this.connectorGroup = this.svg.group();
     this.svg.on('mousemove', (event: MouseEvent) => {
       const { x, y } = event;
       this.cursorPosition = { x, y };
-      this.connectorShadow && this.connectorShadow.findOne('line').attr({ x2: x, y2: y });
+
+      // Noting to do.
+      if (!(this.connectorShadow || this.focusedModule)) {
+        return;
+      }
+
+      // Skip handling
+      if (!waiting) {
+        waiting = true;
+        window.requestAnimationFrame(() => (waiting = false));
+        return;
+      }
+
+      if (this.connectorShadow) {
+        this.connectorShadow.findOne('line').attr({ x2: x, y2: y });
+      }
+
+      if (this.focusedModule) {
+        this.focusedModule.x = x;
+        this.focusedModule.y = y;
+        this.focusedModule.update();
+      }
     });
   }
 
@@ -86,8 +109,8 @@ export default class CanvasContext {
       const connectorGroup = this.getConnectorGroup();
       const lineGroup = connectorGroup.group();
       const pos = {
-        x1: module.getGraphic().cx(),
-        y1: module.getGraphic().cy(),
+        x1: module.x,
+        y1: module.y,
         x2: this.cursorPosition.x,
         y2: this.cursorPosition.y,
       };
@@ -99,7 +122,8 @@ export default class CanvasContext {
           linecap: 'round',
         })
         .attr({
-          'stroke-dasharray': '5,5',
+          'stroke-dasharray': '10',
+          class: 'dash',
         });
       lineGroup
         .circle(ModuleConnector.HEAD_SIZE)

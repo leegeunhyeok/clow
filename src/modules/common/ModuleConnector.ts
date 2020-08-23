@@ -1,4 +1,4 @@
-import CanvasContext from '../../CanvasContext';
+import SVGContext from '../../SVGContext';
 import { G } from '@svgdotjs/svg.js';
 import CrawlyModule from './CrawlyModule';
 
@@ -19,16 +19,20 @@ class ModuleConnector {
   constructor(from: CrawlyModule, to: CrawlyModule) {
     this.from = from;
     this.to = to;
-    const connectorGroup = CanvasContext.getInstance().getConnectorGroup();
+    const connectorGroup = SVGContext.getInstance().getConnectorGroup();
     const lineGroup = connectorGroup.group();
     const pos = this.getConnectorPosition();
     lineGroup
       .line(pos.x1, pos.y1, pos.x2, pos.y2)
-      .stroke({ color: '#999', width: ModuleConnector.LINE_WIDTH, linecap: 'round' });
+      .stroke({ color: '#999', width: ModuleConnector.LINE_WIDTH, linecap: 'round' })
+      .attr({ class: 'connector' });
     lineGroup
       .circle(ModuleConnector.HEAD_SIZE)
       .attr({ cx: pos.x1, cy: pos.y1 })
       .attr({ fill: from.color });
+    lineGroup.on('click', () => {
+      this.destroy();
+    });
     this.g = lineGroup;
   }
 
@@ -74,6 +78,10 @@ class ModuleConnector {
     }
 
     return pos;
+  }
+
+  destroy() {
+    this.g.remove();
   }
 }
 
