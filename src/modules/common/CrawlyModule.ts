@@ -29,6 +29,7 @@ export default class CrawlyModule {
   public static CELL_SIZE = 10;
   public static RENDER_PADDING = 5;
   public static COMPONENT_MARGIN = 2;
+  public name = 'UnknownModule';
   public x: number = 100;
   public y: number = 100;
   public column: number = 0;
