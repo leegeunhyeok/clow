@@ -2,6 +2,9 @@
   "name": "crawly",
   "description": "Crawly is an easy to use, powerful, and crawling system to process/store data.",
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.30",
+    "@fortawesome/free-solid-svg-icons": "^5.14.0",
+    "@fortawesome/react-fontawesome": "^0.1.11",
     "@svgdotjs/svg.draggable.js": "^3.0.2",
     "@svgdotjs/svg.js": "^3.0.16",
     "@testing-library/jest-dom": "^4.2.4",
