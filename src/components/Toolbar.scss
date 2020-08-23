@@ -1,0 +1,45 @@
+.Toolbar {
+  position: fixed;
+  bottom: 0px;
+  left: 0;
+  width: 100%;
+  padding: 1rem;
+
+  .Container {
+    display: flex;
+    background-color: #fff;
+    padding: 1rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+    border-radius: 2rem;
+    margin: auto;
+    width: 100%;
+    max-width: 500px;
+
+    .Control {
+      display: flex;
+      flex-grow: 9;
+      overflow: hidden;
+
+      button {
+        margin-right: 0.5rem;
+
+        &:nth-last-child() {
+          margin-left: 0;
+        }
+      }
+
+      &--fixed {
+        min-width: 100px;
+        margin-left: 1rem;
+
+        button {
+          width: 2rem;
+          height: 2rem;
+          padding: 0;
+          border-radius: 50%;
+          margin-right: 0.5rem;
+        }
+      }
+    }
+  }
+}

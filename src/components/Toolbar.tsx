@@ -1,23 +1,50 @@
 import React, { useState } from 'react';
-import './Toolbar.css';
-import CanvasContext from '../CanvasContext';
-import Pager from '../modules/Pager';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLink, faTimes, faArrowUp, faArrowDown } from '@fortawesome/free-solid-svg-icons';
+import './Toolbar.scss';
+import SVGContext from '../SVGContext';
+import modules from '../modules';
 
 const Toolbar = () => {
-  const canvasContext = CanvasContext.getInstance();
+  const ctx = SVGContext.getInstance();
   const [connecting, setConnectingState] = useState(false);
-  canvasContext.on('connectingstatechange', setConnectingState);
+  ctx.on('connectingstatechange', setConnectingState);
 
-  const createModule = () => {
-    canvasContext.registModule(new Pager(2, 3, '#aaaaaa'));
+  const createModule = (TargetModule: typeof modules[number]) => {
+    ctx.registModule(new TargetModule());
   };
 
-  const toggleConnection = () => canvasContext.connecting(!connecting);
+  const toggleConnection = () => ctx.connecting(!connecting);
+
+  const renderModuleButton = () => {
+    return modules.map((module, i) => {
+      const style = {
+        backgroundColor: module.COLOR,
+      };
+      return (
+        <button style={style} key={i} onClick={() => createModule(module)}>
+          {module.name}
+        </button>
+      );
+    });
+  };
 
   return (
     <div className="Toolbar">
-      <button onClick={() => createModule()}>Add module</button>
-      <button onClick={() => toggleConnection()}>{connecting ? 'Done' : 'Connect'}</button>
+      <div className="Container">
+        <div className="Control">{renderModuleButton()}</div>
+        <div className="Control--fixed">
+          <button onClick={() => toggleConnection()}>
+            <FontAwesomeIcon icon={connecting ? faTimes : faLink} />
+          </button>
+          <button>
+            <FontAwesomeIcon icon={faArrowUp} />
+          </button>
+          <button>
+            <FontAwesomeIcon icon={faArrowDown} />
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
