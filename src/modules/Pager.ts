@@ -32,14 +32,3 @@ export default class Pager extends CrawlyModule {
     this.data['url'] = targetUrl;
   }
 }
-
-/**
- * 
-interface DOMConfig {
-  type: string;
-  text?: string;
-  attr?: { [key: string]: string };
-  on?: { [key: string]: Function };
-  children?: DOMConfig[];
-}
- */
