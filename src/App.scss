@@ -1,0 +1,39 @@
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+.dash {
+  animation: dash 2s linear infinite;
+}
+
+@keyframes dash {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -100px;
+  }
+}
+
+line.connector {
+  cursor: pointer;
+
+  &:hover {
+    stroke: tomato;
+  }
+}
+
+foreignObject {
+  cursor: grab;
+
+  &.grap {
+    cursor: grabbing;
+  }
+}
+
+input[type='text'],
+input[type='number'],
+input[type='password'],
+textarea {
+}
