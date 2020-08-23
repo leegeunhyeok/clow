@@ -3,13 +3,13 @@ import DataTypes from './common/Types';
 
 export default class Pager extends CrawlyModule {
   inputType = DataTypes.STRING;
-  outputType = DataTypes.STRING;
+  outputType = DataTypes.PAGE;
+  color = '#cfd8dc';
+  row = 2;
+  column = 14;
 
-  constructor(row: number, column: number, color: string) {
-    super();
-    this.row = row;
-    this.column = column;
-    this.color = color;
+  constructor(x?: number, y?: number) {
+    super(x, y);
     this.addComponent(
       {
         type: 'input',
@@ -17,24 +17,19 @@ export default class Pager extends CrawlyModule {
           type: 'text',
         },
         on: {
-          click: this.onClick,
-          change: this.onChange,
-          mouseover: this.onChange,
+          change: this.onChange.bind(this),
         },
       },
       0,
-      2,
-      6,
+      0,
+      14,
       2,
     );
   }
 
-  onClick() {
-    console.log('click!');
-  }
-
   onChange(event: InputEvent) {
-    console.log((event.target as HTMLInputElement).value);
+    const targetUrl = (event.target as HTMLInputElement).value;
+    this.data['url'] = targetUrl;
   }
 }
 
