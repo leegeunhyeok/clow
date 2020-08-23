@@ -19,6 +19,7 @@ const Toolbar = () => {
   const renderModuleButton = () => {
     return modules.map((module, i) => {
       const style = {
+        color: module.TEXT_COLOR,
         backgroundColor: module.COLOR,
       };
       return (

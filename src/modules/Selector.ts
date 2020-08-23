@@ -3,6 +3,7 @@ import DataTypes from './common/Types';
 
 export default class Selector extends CrawlyModule {
   static COLOR = '#2196f3';
+  static TEXT_COLOR = '#ffffff';
   inputType = [DataTypes.PAGE, DataTypes.ELEMENT];
   outputType = DataTypes.ELEMENT;
   row = 4;
@@ -31,9 +32,6 @@ export default class Selector extends CrawlyModule {
       {
         type: 'div',
         text: 'Only one',
-        attr: {
-          style: 'color: #fff',
-        },
       },
       2,
       6,

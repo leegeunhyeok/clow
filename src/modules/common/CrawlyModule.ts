@@ -27,6 +27,7 @@ export type Graphics = Rect | Circle | Ellipse;
 
 export default class CrawlyModule {
   public static COLOR = '#ffffff';
+  public static TEXT_COLOR = '#000000';
   public static CELL_SIZE = 12;
   public static RENDER_PADDING = 5;
   public static COMPONENT_MARGIN = 2;
@@ -69,8 +70,10 @@ export default class CrawlyModule {
     this.width = this.column * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2;
     this.height = this.row * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2;
     const color = (this.constructor as typeof CrawlyModule).COLOR;
+    const textColor = (this.constructor as typeof CrawlyModule).TEXT_COLOR;
     const graphic = this.g.rect(this.width, this.height).radius(8).fill(color);
 
+    this.g.attr({ style: `color:${textColor}` });
     this.g.on('mousedown', () => {
       this.ctx.focusedModule = this;
       this.g.findOne('foreignObject').addClass('grap');
