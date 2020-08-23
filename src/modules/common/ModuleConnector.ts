@@ -29,7 +29,7 @@ class ModuleConnector {
     lineGroup
       .circle(ModuleConnector.HEAD_SIZE)
       .attr({ cx: pos.x1, cy: pos.y1 })
-      .attr({ fill: from.color });
+      .attr({ fill: (from.constructor as typeof CrawlyModule).COLOR });
     lineGroup.on('click', () => {
       this.destroy();
     });
