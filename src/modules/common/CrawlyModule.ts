@@ -89,7 +89,7 @@ export default class CrawlyModule {
 
     this.g.on('mouseleave', () => {
       if (this.ctx.isConnecting) {
-        graphic.transform({ scale: 1 });
+        this.resetConnection();
       }
     });
 
@@ -191,8 +191,12 @@ export default class CrawlyModule {
     return el;
   }
 
-  getGraphic() {
+  getSVG() {
     return this.g as G;
+  }
+
+  getGraphic() {
+    return this.graphic as Graphics;
   }
 
   isConnectable(to: CrawlyModule): boolean {
@@ -211,6 +215,11 @@ export default class CrawlyModule {
     }
   }
 
+  resetConnection() {
+    this.graphic && this.graphic.transform({ scale: 1 });
+    this.inConnectRelation = false;
+  }
+
   connect(to: CrawlyModule) {
     const connector = new ModuleConnector(this, to);
     this.connectors.push(connector);
@@ -227,6 +236,7 @@ export default class CrawlyModule {
   }
 
   destroy() {
+    [...this.connectors].forEach((connector) => connector.destroy());
     this.g.remove();
   }
 }

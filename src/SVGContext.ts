@@ -96,14 +96,20 @@ export default class CanvasContext {
     module.destroy();
   }
 
+  private initConnection() {
+    if (this.connectingFrom) {
+      this.connectingFrom.resetConnection();
+    }
+    if (this.connectingTo) {
+      this.connectingTo.resetConnection();
+    }
+    this.connectorShadow = void (this.connectorShadow && this.connectorShadow.remove());
+    this.connectingFrom = this.connectingTo = null;
+  }
+
   connecting(state: boolean) {
     this.isConnecting = state;
-    if (!state) {
-      this.connectorShadow = void (this.connectorShadow && this.connectorShadow.remove());
-      this.connectingFrom && (this.connectingFrom.inConnectRelation = false);
-      this.connectingTo && (this.connectingTo.inConnectRelation = false);
-      this.connectingFrom = this.connectingTo = null;
-    }
+    this.initConnection();
     this.callEventHandler('connectingstatechange', state);
   }
 
@@ -139,7 +145,7 @@ export default class CanvasContext {
 
     if (this.connectingFrom && this.connectingTo) {
       this.connectingFrom.connect(this.connectingTo);
-      this.connecting(false);
+      this.initConnection();
     }
   }
 
