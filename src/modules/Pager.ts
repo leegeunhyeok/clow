@@ -2,11 +2,11 @@ import CrawlyModule from './common/CrawlyModule';
 import DataTypes from './common/Types';
 
 export default class Pager extends CrawlyModule {
+  static COLOR = '#cfd8dc';
   inputType = DataTypes.STRING;
   outputType = DataTypes.PAGE;
-  color = '#cfd8dc';
   row = 2;
-  column = 14;
+  column = 16;
 
   constructor(x?: number, y?: number) {
     super(x, y);
@@ -15,6 +15,7 @@ export default class Pager extends CrawlyModule {
         type: 'input',
         attr: {
           type: 'text',
+          placeholder: 'Page URL',
         },
         on: {
           change: this.onChange.bind(this),
@@ -22,7 +23,7 @@ export default class Pager extends CrawlyModule {
       },
       0,
       0,
-      14,
+      16,
       2,
     );
   }
