@@ -12,6 +12,7 @@ interface ConnectorLinePosition {
 class ModuleConnector {
   public static HEAD_SIZE = 20;
   public static LINE_WIDTH = 3;
+  public id = 'connector_' + +new Date();
   protected from: CrawlyModule;
   protected to: CrawlyModule;
   protected g: G;
