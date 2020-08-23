@@ -4,7 +4,7 @@ import ModuleConnector from './ModuleConnector';
 import DataTypes from './Types';
 
 interface ModuleData {
-  [key: string]: string | number;
+  [key: string]: string | number | boolean;
 }
 
 interface DOMConfig {
@@ -26,17 +26,16 @@ interface UIComponent {
 export type Graphics = Rect | Circle | Ellipse;
 
 export default class CrawlyModule {
-  public static CELL_SIZE = 10;
+  public static COLOR = '#ffffff';
+  public static CELL_SIZE = 12;
   public static RENDER_PADDING = 5;
   public static COMPONENT_MARGIN = 2;
-  public name = 'UnknownModule';
   public x: number = 100;
   public y: number = 100;
   public column: number = 0;
   public row: number = 0;
   public width: number = 0;
   public height: number = 0;
-  public color: string = '#ffffff';
   public inConnectRelation: boolean = false;
   public inputType: DataTypes | DataTypes[];
   public outputType: DataTypes | DataTypes[];
@@ -69,8 +68,8 @@ export default class CrawlyModule {
   init() {
     this.width = this.column * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2;
     this.height = this.row * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2;
-    const graphic = this.g.rect(this.width, this.height).radius(8).fill(this.color);
-    const self = this;
+    const color = (this.constructor as typeof CrawlyModule).COLOR;
+    const graphic = this.g.rect(this.width, this.height).radius(8).fill(color);
 
     this.g.on('mousedown', () => {
       this.ctx.focusedModule = this;
@@ -82,14 +81,14 @@ export default class CrawlyModule {
       this.g.findOne('foreignObject').removeClass('grap');
     });
 
-    this.g.on('mouseover', function (this: Graphics) {
-      if (self.ctx.isConnecting) {
+    this.g.on('mouseover', () => {
+      if (this.ctx.isConnecting) {
         graphic.transform({ scale: 1.1 });
       }
     });
 
-    this.g.on('mouseleave', function (this: Graphics) {
-      if (self.ctx.isConnecting) {
+    this.g.on('mouseleave', () => {
+      if (this.ctx.isConnecting) {
         graphic.transform({ scale: 1 });
       }
     });
@@ -102,14 +101,8 @@ export default class CrawlyModule {
     });
 
     const foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
-    foreignObject.setAttribute(
-      'width',
-      (this.column * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2).toString(),
-    );
-    foreignObject.setAttribute(
-      'height',
-      (this.row * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2).toString(),
-    );
+    foreignObject.setAttribute('width', this.width.toString());
+    foreignObject.setAttribute('height', this.height.toString());
 
     const componentList = [];
     for (const component of this.components) {
@@ -117,15 +110,22 @@ export default class CrawlyModule {
       el.setAttribute(
         'style',
         `
-        position:absolute;
         top:${component.row * CrawlyModule.CELL_SIZE + CrawlyModule.COMPONENT_MARGIN}px;
         left:${component.column * CrawlyModule.CELL_SIZE + CrawlyModule.COMPONENT_MARGIN}px;
         width:${component.width * CrawlyModule.CELL_SIZE - CrawlyModule.COMPONENT_MARGIN * 2}px;
         height:${component.height * CrawlyModule.CELL_SIZE - CrawlyModule.COMPONENT_MARGIN * 2}px;
+        ${el.getAttribute('style') || ''};
       `.replace(/\s/g, ''),
       );
       componentList.push(el);
     }
+
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'x';
+    deleteButton.classList.add('close');
+    deleteButton.addEventListener('click', () => {
+      this.ctx.unregistModule(this);
+    });
 
     const wrap = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
     wrap.setAttribute(
@@ -137,6 +137,8 @@ export default class CrawlyModule {
       height:0px;
     `.replace(/\s/g, ''),
     );
+
+    wrap.appendChild(deleteButton);
 
     for (const componentEl of componentList) {
       wrap.appendChild(componentEl);
@@ -181,7 +183,9 @@ export default class CrawlyModule {
     }
 
     if (config.children && config.children.length > 0) {
-      config.children.map(this.createElementFromDOMConfig).forEach(el.appendChild);
+      for (const child of config.children) {
+        el.appendChild(this.createElementFromDOMConfig(child));
+      }
     }
 
     return el;
@@ -191,16 +195,16 @@ export default class CrawlyModule {
     return this.g as G;
   }
 
-  isConnectable(to: CrawlyModule) {
+  isConnectable(to: CrawlyModule): boolean {
     if (Array.isArray(this.outputType)) {
       if (Array.isArray(to.inputType)) {
-        return this.outputType.every((x) => (to.inputType as DataTypes[]).includes(x));
+        return this.outputType.some((x) => (to.inputType as DataTypes[]).includes(x));
       } else {
-        return to.inputType in this.outputType;
+        return !!this.outputType.find((x) => x === to.inputType);
       }
     } else {
       if (Array.isArray(to.inputType)) {
-        return this.outputType in to.inputType;
+        return !!to.inputType.find((x) => x === this.outputType);
       } else {
         return this.outputType === to.inputType;
       }
@@ -220,5 +224,9 @@ export default class CrawlyModule {
   disconnect(connector: ModuleConnector) {
     const idx = this.connectors.findIndex((c) => c === connector);
     this.connectors.splice(idx, 1);
+  }
+
+  destroy() {
+    this.g.remove();
   }
 }

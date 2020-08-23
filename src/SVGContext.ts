@@ -91,7 +91,9 @@ export default class CanvasContext {
   }
 
   unregistModule(module: CrawlyModule) {
-    console.log(module);
+    const idx = this.modules.findIndex((x) => x === module);
+    this.modules.splice(idx, 1);
+    module.destroy();
   }
 
   connecting(state: boolean) {
@@ -100,6 +102,7 @@ export default class CanvasContext {
       this.connectorShadow = void (this.connectorShadow && this.connectorShadow.remove());
       this.connectingFrom && (this.connectingFrom.inConnectRelation = false);
       this.connectingTo && (this.connectingTo.inConnectRelation = false);
+      this.connectingFrom = this.connectingTo = null;
     }
     this.callEventHandler('connectingstatechange', state);
   }
@@ -125,22 +128,18 @@ export default class CanvasContext {
           'stroke-dasharray': '10',
           class: 'dash',
         });
-      lineGroup
-        .circle(ModuleConnector.HEAD_SIZE)
-        .attr({ cx: pos.x1, cy: pos.y1 })
-        .attr({ fill: module.color });
       this.connectorShadow = lineGroup;
       this.connectingFrom = module;
     } else if (this.connectingFrom.isConnectable(module)) {
       this.connectingTo = module;
     } else {
       this.callEventHandler('notconnectable');
+      return;
     }
 
     if (this.connectingFrom && this.connectingTo) {
-      this.connecting(false);
       this.connectingFrom.connect(this.connectingTo);
-      this.connectingFrom = this.connectingTo = null;
+      this.connecting(false);
     }
   }
 
