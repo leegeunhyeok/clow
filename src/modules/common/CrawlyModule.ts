@@ -1,7 +1,11 @@
-import { SVG, G, Rect, Circle, Ellipse } from '@svgdotjs/svg.js';
-import CanvasContext from '../../CanvasContext';
-import ModuleConnector from './Connector';
+import { G, Rect, Circle, Ellipse } from '@svgdotjs/svg.js';
+import SVGContext from '../../SVGContext';
+import ModuleConnector from './ModuleConnector';
 import DataTypes from './Types';
+
+interface ModuleData {
+  [key: string]: string | number;
+}
 
 interface DOMConfig {
   type: string;
@@ -24,6 +28,7 @@ export type Graphics = Rect | Circle | Ellipse;
 export default class CrawlyModule {
   public static CELL_SIZE = 10;
   public static RENDER_PADDING = 5;
+  public static COMPONENT_MARGIN = 2;
   public x: number = 100;
   public y: number = 100;
   public column: number = 0;
@@ -34,18 +39,18 @@ export default class CrawlyModule {
   public inConnectRelation: boolean = false;
   public inputType: DataTypes | DataTypes[];
   public outputType: DataTypes | DataTypes[];
-  protected context: CanvasContext;
+  protected data: ModuleData = {};
+  protected ctx: SVGContext;
   protected g: G;
   protected graphic?: Graphics;
   protected connectors: ModuleConnector[] = [];
   private components: UIComponent[] = [];
-  public drag = false;
 
   constructor(x = 100, y = 100) {
-    this.context = CanvasContext.getInstance();
+    this.ctx = SVGContext.getInstance();
     this.x = x;
     this.y = y;
-    this.g = this.context.getSvg().group();
+    this.g = this.ctx.getSvg().group();
     this.inputType = DataTypes.NULL;
     this.outputType = DataTypes.NULL;
   }
@@ -61,50 +66,37 @@ export default class CrawlyModule {
   }
 
   init() {
-    const self = this;
     this.width = this.column * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2;
     this.height = this.row * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2;
-    this.graphic = this.g.rect(this.width, this.height).radius(8).fill(this.color);
-    console.log(this.width, this.height);
+    const graphic = this.g.rect(this.width, this.height).radius(8).fill(this.color);
+    const self = this;
 
-    this.g.on('mousedown', (event: MouseEvent) => {
-      this.drag = true;
+    this.g.on('mousedown', () => {
+      this.ctx.focusedModule = this;
+      this.g.findOne('foreignObject').addClass('grap');
     });
 
-    this.g.on('mousemove', (event: MouseEvent) => {
-      if (!this.drag) return;
-      // TODO: Check position
-      // const dim = (event.target as SVGElement).getBoundingClientRect();
-      // const x = event.clientX - dim.left;
-      // const y = event.clientY - dim.top;
-      this.x = event.x;
-      this.y = event.y;
-      this.update();
-      this.connectors.forEach((connector) => connector.update());
-      console.log(
-        `%cObj (${this.x}, ${this.y})`,
-        `padding:0 5px;border-radius:4px;color:#fff;background-color:${this.color};`,
-      );
+    this.g.on('mouseup', () => {
+      this.ctx.focusedModule = null;
+      this.g.findOne('foreignObject').removeClass('grap');
     });
 
-    this.g.on('mouseup,mouseleave', () => {
-      this.drag = false;
-    });
-
-    this.graphic.on('mouseover', function (this: Graphics) {
-      if (self.context.isConnecting) {
-        this.transform({ scale: 1.1 });
+    this.g.on('mouseover', function (this: Graphics) {
+      if (self.ctx.isConnecting) {
+        graphic.transform({ scale: 1.1 });
       }
     });
 
-    this.graphic.on('mouseleave', function (this: Graphics) {
-      this.transform({ scale: 1 });
+    this.g.on('mouseleave', function (this: Graphics) {
+      if (self.ctx.isConnecting) {
+        graphic.transform({ scale: 1 });
+      }
     });
 
-    this.graphic.on('click', () => {
-      if (this.context.isConnecting && !this.inConnectRelation) {
+    this.g.on('click', () => {
+      if (this.ctx.isConnecting && !this.inConnectRelation) {
         this.inConnectRelation = true;
-        this.context.connectRelation(this);
+        this.ctx.connectRelation(this);
       }
     });
 
@@ -124,15 +116,13 @@ export default class CrawlyModule {
       el.setAttribute(
         'style',
         `
-        display:block;
         position:absolute;
-        top:${component.row * CrawlyModule.CELL_SIZE}px;
-        left:${component.column * CrawlyModule.CELL_SIZE}px;
-        width:${component.width * CrawlyModule.CELL_SIZE}px;
-        height:${component.height * CrawlyModule.CELL_SIZE}px;
+        top:${component.row * CrawlyModule.CELL_SIZE + CrawlyModule.COMPONENT_MARGIN}px;
+        left:${component.column * CrawlyModule.CELL_SIZE + CrawlyModule.COMPONENT_MARGIN}px;
+        width:${component.width * CrawlyModule.CELL_SIZE - CrawlyModule.COMPONENT_MARGIN * 2}px;
+        height:${component.height * CrawlyModule.CELL_SIZE - CrawlyModule.COMPONENT_MARGIN * 2}px;
       `.replace(/\s/g, ''),
       );
-
       componentList.push(el);
     }
 
@@ -154,14 +144,17 @@ export default class CrawlyModule {
     foreignObject.appendChild(wrap);
     this.g.node.appendChild(foreignObject);
     this.update();
+    this.graphic = graphic;
   }
 
   update() {
     const x = this.x - this.width / 2;
     const y = this.y - this.height / 2;
-    this.g.attr({
-      transform: `translate(${x},${y})`,
+    this.g.transform({
+      translateX: x,
+      translateY: y,
     });
+    this.connectors.forEach((connector) => connector.update());
   }
 
   private createElementFromDOMConfig(config: DOMConfig) {
@@ -194,7 +187,7 @@ export default class CrawlyModule {
   }
 
   getGraphic() {
-    return this.graphic as Graphics;
+    return this.g as G;
   }
 
   isConnectable(to: CrawlyModule) {
@@ -221,5 +214,9 @@ export default class CrawlyModule {
 
   connectorFrom(connector: ModuleConnector) {
     this.connectors.push(connector);
+  }
+
+  disconnect(connector: ModuleConnector) {
+    console.log(connector, this.connectors);
   }
 }
