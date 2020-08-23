@@ -217,6 +217,7 @@ export default class CrawlyModule {
   }
 
   disconnect(connector: ModuleConnector) {
-    console.log(connector, this.connectors);
+    const idx = this.connectors.findIndex((c) => c === connector);
+    this.connectors.splice(idx, 1);
   }
 }

@@ -81,6 +81,8 @@ class ModuleConnector {
   }
 
   destroy() {
+    this.from.disconnect(this);
+    this.to.disconnect(this);
     this.g.remove();
   }
 }
