@@ -13,8 +13,8 @@ LOGO
 - [ ] README.md Documentation :pencil:
 - [ ] Congiruration :clipboard:
 - Basic Modules :package:
-  - [ ] Pager
-  - [ ] Selector
+  - [x] Pager
+  - [x] Selector
   - [ ] Parser
   - [ ] Dispatcher
   - [ ] Combiner
@@ -22,7 +22,7 @@ LOGO
   - [ ] Converter
   - [ ] Store
   - And more..
-- [ ] Making crawling workflow in Webpage :earth_americas:
+- [x] Making crawling workflow in Webpage :earth_americas:
 - [ ] Export workflow :fast_forward:
 - [ ] Load workflow :rewind:
 - [ ] Execute crawling from exported workflow data :muscle:

@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import './App.scss';
+import NotificationContainer from './containers/NotificationContainer';
 import Toolbar from './components/Toolbar';
 import SVGContext from './SVGContext';
 
@@ -18,6 +19,7 @@ const App = () => {
 
   return (
     <div ref={canvas} className="App">
+      <NotificationContainer />
       <Toolbar />
     </div>
   );
