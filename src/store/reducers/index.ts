@@ -1,12 +1,12 @@
 import { combineReducers } from 'redux';
-import notification, { NotificationState } from './notification';
+import engineReducer, { EngineState } from './engine';
 
 export interface RootState {
-  notification: NotificationState;
+  engine: EngineState;
 }
 
 const rootReducer = combineReducers({
-  notification,
+  engine: engineReducer,
 });
 
 export default rootReducer;

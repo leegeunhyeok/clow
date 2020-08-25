@@ -1,28 +1,25 @@
-import { ThunkAction } from 'redux-thunk';
-import { NotificationModel } from '../models';
+import { Dispatch } from 'redux';
 import * as types from './types';
-import { RootState } from '../reducers';
+import axios from 'axios';
 
-export interface RequestNotificationAction {
-  type: typeof types.REQUEST_NOTIFICATION;
-  payload: NotificationModel;
+interface StartEngineAction {
+  type: typeof types.START_ENGINE;
+  payload: boolean;
 }
 
-export interface CloseNotificationAction {
-  type: typeof types.CLOSE_NOTIFICATION;
-}
+export type EngineActions = StartEngineAction;
 
-export type NotificationActions = RequestNotificationAction | CloseNotificationAction;
-
-const requestNotification = (notification: NotificationModel): RequestNotificationAction => ({
-  type: types.REQUEST_NOTIFICATION,
-  payload: notification,
+const startEngineAction = (success: boolean): StartEngineAction => ({
+  type: types.START_ENGINE,
+  payload: success,
 });
 
-const closeNotification = (): CloseNotificationAction => ({
-  type: types.CLOSE_NOTIFICATION,
-});
-
-export const reqeustNotification = () => (dispatch) => {
-  // TODO
-};
+export const excuteFromServer = (data: any) => (dispatch: Dispatch) =>
+  axios
+    .post('/engine/start', data)
+    .then((response) => {
+      dispatch(startEngineAction(response.status === 200));
+    })
+    .catch((error) => {
+      throw error;
+    });
