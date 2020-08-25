@@ -1,10 +1,10 @@
 <div align="center">
 
-# Crawly
+# Clow
 
 LOGO
 
-> Crawly is an easy to use, powerful, and crawling system to process/store data.
+> Clow is an easy to use, powerful, and crawling system to process/store data.
 
 </div>
 
@@ -35,8 +35,8 @@ LOGO
 # install dependencies
 npm install
 
-# serve with hot reload at localhost:8080
-npm run serve
+# serve with hot reload at localhost:3000
+npm run start
 
 # build (web)
 npm run build
