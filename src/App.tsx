@@ -1,19 +1,20 @@
 import React, { useRef, useEffect } from 'react';
 import './App.scss';
 import Toolbar from './components/Toolbar';
-import SVGContext from './ClowContext';
+import ClowContext from './ClowContext';
+
+import keyboard, { KeyCode } from './services/KeyboardService';
 
 const App = () => {
   const canvas = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const ctx = SVGContext.getInstance();
+    const ctx = ClowContext.getInstance();
     ctx.init(canvas.current as HTMLElement);
-    window.addEventListener('keyup', (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        ctx.connecting(false);
-      }
-    });
+    const subscription = keyboard.on(KeyCode.Escape).subscribe(() => ctx.connecting(false));
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   return (
