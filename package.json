@@ -1,6 +1,6 @@
 {
-  "name": "crawly",
-  "description": "Crawly is an easy to use, powerful, and crawling system to process/store data.",
+  "name": "clow",
+  "description": "Clow is an easy to use, powerful, and crawling system to process/store data.",
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.30",
     "@fortawesome/free-solid-svg-icons": "^5.14.0",
@@ -16,6 +16,7 @@
     "@types/react-dom": "^16.9.8",
     "@types/react-redux": "^7.1.9",
     "@types/redux-logger": "^3.0.8",
+    "axios": "^0.20.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-redux": "^7.2.1",
@@ -24,7 +25,9 @@
     "redux-devtools-extension": "^2.13.8",
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.3.0",
-    "typescript": "^3.7.5"
+    "rxjs": "^6.6.2",
+    "typescript": "^3.7.5",
+    "node-sass": "^4.14.1"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -39,11 +42,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/leegeunhyeok/crawly"
+    "url": "https://github.com/leegeunhyeok/clow"
   },
   "bugs": {
     "email": "dev.ghlee@gmail.com",
-    "url": "https://github.com/leegeunhyeok/crawly/issues"
+    "url": "https://github.com/leegeunhyeok/clow/issues"
   },
   "license": "MIT",
   "eslintConfig": {
@@ -60,8 +63,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "node-sass": "^4.14.1"
   }
 }

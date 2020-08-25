@@ -1,7 +1,7 @@
-import CrawlyModule from './common/CrawlyModule';
+import ClowModule from './common/ClowModule';
 import DataTypes from './common/Types';
 
-export default class Selector extends CrawlyModule {
+export default class Selector extends ClowModule {
   static COLOR = '#2196f3';
   static TEXT_COLOR = '#ffffff';
   inputType = [DataTypes.PAGE, DataTypes.ELEMENT];

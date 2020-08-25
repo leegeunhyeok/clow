@@ -1,5 +1,5 @@
 import { G, Rect, Circle, Ellipse } from '@svgdotjs/svg.js';
-import SVGContext from '../../SVGContext';
+import ClowContext from '../../ClowContext';
 import ModuleConnector from './ModuleConnector';
 import DataTypes from './Types';
 
@@ -42,14 +42,14 @@ export default class CrawlyModule {
   public inputType: DataTypes | DataTypes[];
   public outputType: DataTypes | DataTypes[];
   protected data: ModuleData = {};
-  protected ctx: SVGContext;
+  protected ctx: ClowContext;
   protected g: G;
   protected graphic?: Graphics;
   protected connectors: ModuleConnector[] = [];
   private components: UIComponent[] = [];
 
   constructor(x = 100, y = 100) {
-    this.ctx = SVGContext.getInstance();
+    this.ctx = ClowContext.getInstance();
     this.x = x;
     this.y = y;
     this.g = this.ctx.getSvg().group();

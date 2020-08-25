@@ -1,7 +1,7 @@
-import CrawlyModule from './common/CrawlyModule';
+import ClowModule from './common/ClowModule';
 import DataTypes from './common/Types';
 
-export default class Pager extends CrawlyModule {
+export default class Pager extends ClowModule {
   static COLOR = '#cfd8dc';
   inputType = DataTypes.STRING;
   outputType = DataTypes.PAGE;

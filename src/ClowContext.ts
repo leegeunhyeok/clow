@@ -1,5 +1,5 @@
 import { SVG, Svg, G } from '@svgdotjs/svg.js';
-import CrawlyModule from './modules/common/CrawlyModule';
+import ClowModule from './modules/common/ClowModule';
 import ModuleConnector from './modules/common/ModuleConnector';
 
 interface Point {
@@ -18,11 +18,11 @@ export default class CanvasContext {
   private connectorGroup?: G;
   private connectorShadow?: G;
   private onEvent: ContextEventHandlerStore = {};
-  private modules: CrawlyModule[] = [];
-  public focusedModule: CrawlyModule | null = null;
+  private modules: ClowModule[] = [];
+  public focusedModule: ClowModule | null = null;
   public isConnecting: boolean = false;
-  public connectingFrom?: CrawlyModule | null;
-  public connectingTo?: CrawlyModule | null;
+  public connectingFrom?: ClowModule | null;
+  public connectingTo?: ClowModule | null;
 
   private constructor() {
     CanvasContext.instance = this;
@@ -85,15 +85,15 @@ export default class CanvasContext {
     return this.connectorGroup as G;
   }
 
-  registModule(module: CrawlyModule) {
-    module.init();
-    this.modules.push(module);
+  registModule(clowModule: ClowModule) {
+    clowModule.init();
+    this.modules.push(clowModule);
   }
 
-  unregistModule(module: CrawlyModule) {
-    const idx = this.modules.findIndex((x) => x === module);
+  unregistModule(clowModule: ClowModule) {
+    const idx = this.modules.findIndex((x) => x === clowModule);
     this.modules.splice(idx, 1);
-    module.destroy();
+    clowModule.destroy();
   }
 
   private initConnection() {
@@ -113,13 +113,13 @@ export default class CanvasContext {
     this.callEventHandler('connectingstatechange', state);
   }
 
-  connectRelation(module: CrawlyModule) {
+  connectRelation(clowModule: ClowModule) {
     if (!this.connectingFrom) {
       const connectorGroup = this.getConnectorGroup();
       const lineGroup = connectorGroup.group();
       const pos = {
-        x1: module.x,
-        y1: module.y,
+        x1: clowModule.x,
+        y1: clowModule.y,
         x2: this.cursorPosition.x,
         y2: this.cursorPosition.y,
       };
@@ -135,9 +135,9 @@ export default class CanvasContext {
           class: 'dash',
         });
       this.connectorShadow = lineGroup;
-      this.connectingFrom = module;
-    } else if (this.connectingFrom.isConnectable(module)) {
-      this.connectingTo = module;
+      this.connectingFrom = clowModule;
+    } else if (this.connectingFrom.isConnectable(clowModule)) {
+      this.connectingTo = clowModule;
     } else {
       this.callEventHandler('notconnectable');
       return;

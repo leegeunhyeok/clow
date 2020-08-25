@@ -1,6 +1,6 @@
-import SVGContext from '../../SVGContext';
 import { G } from '@svgdotjs/svg.js';
-import CrawlyModule from './CrawlyModule';
+import SVGContext from '../../ClowContext';
+import ClowModule from './ClowModule';
 
 interface ConnectorLinePosition {
   x1: number;
@@ -13,11 +13,11 @@ class ModuleConnector {
   public static HEAD_SIZE = 20;
   public static LINE_WIDTH = 3;
   public id = 'connector_' + +new Date();
-  protected from: CrawlyModule;
-  protected to: CrawlyModule;
+  protected from: ClowModule;
+  protected to: ClowModule;
   protected g: G;
 
-  constructor(from: CrawlyModule, to: CrawlyModule) {
+  constructor(from: ClowModule, to: ClowModule) {
     this.from = from;
     this.to = to;
     const connectorGroup = SVGContext.getInstance().getConnectorGroup();
@@ -30,7 +30,7 @@ class ModuleConnector {
     lineGroup
       .circle(ModuleConnector.HEAD_SIZE)
       .attr({ cx: pos.x1, cy: pos.y1 })
-      .attr({ fill: (from.constructor as typeof CrawlyModule).COLOR });
+      .attr({ fill: (from.constructor as typeof ClowModule).COLOR });
     lineGroup.on('click', () => {
       this.destroy();
     });

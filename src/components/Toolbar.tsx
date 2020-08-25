@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLink, faTimes, faArrowUp, faArrowDown } from '@fortawesome/free-solid-svg-icons';
 import './Toolbar.scss';
-import SVGContext from '../SVGContext';
+import ClowContext from '../ClowContext';
 import modules from '../modules';
 
 const Toolbar = () => {
-  const ctx = SVGContext.getInstance();
+  const ctx = ClowContext.getInstance();
   const [connecting, setConnectingState] = useState(false);
   ctx.on('connectingstatechange', setConnectingState);
 
