@@ -1,6 +1,6 @@
 '''
 MIT License
-Copyright (c) 2019 GeunHyeok LEE
+Copyright (c) 2020 GeunHyeok LEE
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -17,5 +17,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
+from flask import Flask
+from api import init
 
-print('TIL..')
+app = Flask(__name__)
+init(app)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
