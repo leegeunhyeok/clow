@@ -32,19 +32,17 @@ const Toolbar = () => {
 
   return (
     <div className="Toolbar">
-      <div className="Container">
-        <div className="Control">{renderModuleButton()}</div>
-        <div className="Control--fixed">
-          <button onClick={() => toggleConnection()}>
-            <FontAwesomeIcon icon={connecting ? faTimes : faLink} />
-          </button>
-          <button>
-            <FontAwesomeIcon icon={faArrowUp} />
-          </button>
-          <button>
-            <FontAwesomeIcon icon={faArrowDown} />
-          </button>
-        </div>
+      <div className="Control">{renderModuleButton()}</div>
+      <div className="Control--fixed">
+        <button onClick={() => toggleConnection()}>
+          <FontAwesomeIcon icon={connecting ? faTimes : faLink} />
+        </button>
+        <button>
+          <FontAwesomeIcon icon={faArrowUp} />
+        </button>
+        <button>
+          <FontAwesomeIcon icon={faArrowDown} />
+        </button>
       </div>
     </div>
   );

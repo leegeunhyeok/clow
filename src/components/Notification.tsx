@@ -15,7 +15,12 @@ type NotificationProps = {
 };
 
 const Notification = (props: NotificationProps) => {
-  return <div className="Notification">{props.message}</div>;
+  const onClose = () => {};
+  return (
+    <div className="Notification" onClick={onClose}>
+      {props.message}
+    </div>
+  );
 };
 
 export default Notification;
