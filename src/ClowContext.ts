@@ -42,7 +42,7 @@ export default class CanvasContext {
   }
 
   init(container: HTMLElement) {
-    let waiting = false; // for throttle.
+    let task = 0;
     this.svg = SVG().addTo(container).size('100%', '100vh');
     this.connectorGroup = this.svg.group();
     this.svg.on('mousemove', (event: MouseEvent) => {
@@ -54,22 +54,18 @@ export default class CanvasContext {
         return;
       }
 
-      // Skip handling
-      if (!waiting) {
-        waiting = true;
-        window.requestAnimationFrame(() => (waiting = false));
-        return;
-      }
+      cancelAnimationFrame(task);
+      task = window.requestAnimationFrame(() => {
+        if (this.connectorShadow) {
+          this.connectorShadow.findOne('line').attr({ x2: x, y2: y });
+        }
 
-      if (this.connectorShadow) {
-        this.connectorShadow.findOne('line').attr({ x2: x, y2: y });
-      }
-
-      if (this.focusedModule) {
-        this.focusedModule.x = x;
-        this.focusedModule.y = y;
-        this.focusedModule.update();
-      }
+        if (this.focusedModule) {
+          this.focusedModule.x = x;
+          this.focusedModule.y = y;
+          this.focusedModule.update();
+        }
+      });
     });
   }
 
