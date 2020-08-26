@@ -17,11 +17,21 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
+import argparse
 from flask import Flask
 from api import init
 
+parser = argparse.ArgumentParser(description='Clow server/engine agent.')
+parser.add_argument('--host', dest='host', type=str, default='local', choices=['local', 'external'],
+                    help='Clow server host (default: "local")')
+parser.add_argument('--port', dest='port', type=int, default=5000,
+                    help='Clow server port (default: 5000)')
+parser.add_argument('--debug', dest='debug', type=int, default=False, choices=[0, 1],
+                    help='Enable debug mode (default: 0, disabled)')
+args = parser.parse_args()
 app = Flask(__name__)
 init(app)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    host = '0.0.0.0' if args.host == 'external' else None
+    app.run(host=host, port=args.port, debug=args.debug)
