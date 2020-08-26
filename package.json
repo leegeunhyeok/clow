@@ -1,6 +1,6 @@
 {
   "name": "clow",
-  "description": "Clow is an easy to use, powerful, and crawling system to process/store data.",
+  "description": "Clow is an easy to use, powerful, and crawling system to process/collecttore data.",
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.30",
     "@fortawesome/free-solid-svg-icons": "^5.14.0",

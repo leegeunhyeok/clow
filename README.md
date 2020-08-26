@@ -2,9 +2,9 @@
 
 # Clow
 
-LOGO
+<img src="./logo.png" width="400">
 
-> Clow is an easy to use, powerful, and crawling system to process/store data.
+> Clow is an easy to use, powerful, and crawling system to process/collect data.
 
 </div>
 
@@ -41,6 +41,10 @@ npm run start
 # build (web)
 npm run build
 ```
+
+## Resource
+
+- Logo: [Icon](https://material.io/resources/icons/?search=water&icon=invert_colors&style=baseline) customized, (Colors: #3B3B3B, #2B78FE)
 
 ## :key: License
 
