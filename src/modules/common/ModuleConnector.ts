@@ -1,5 +1,5 @@
 import { G } from '@svgdotjs/svg.js';
-import SVGContext from '../../ClowContext';
+import ctx from '../../ClowContext';
 import ClowModule from './ClowModule';
 
 interface ConnectorLinePosition {
@@ -20,7 +20,7 @@ class ModuleConnector {
   constructor(from: ClowModule, to: ClowModule) {
     this.from = from;
     this.to = to;
-    const connectorGroup = SVGContext.getInstance().getConnectorGroup();
+    const connectorGroup = ctx.getConnectorGroup();
     const lineGroup = connectorGroup.group();
     const pos = this.getConnectorPosition();
     lineGroup

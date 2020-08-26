@@ -2,13 +2,12 @@ import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLink, faTimes, faArrowUp, faArrowDown } from '@fortawesome/free-solid-svg-icons';
 import './Toolbar.scss';
-import ClowContext from '../ClowContext';
+import ctx, { ClowEvent } from '../ClowContext';
 import modules from '../modules';
 
 const Toolbar = () => {
-  const ctx = ClowContext.getInstance();
   const [connecting, setConnectingState] = useState(false);
-  ctx.on('connectingstatechange', setConnectingState);
+  ctx.on(ClowEvent.CONNECTING_STATE_CHANGE, setConnectingState);
 
   const createModule = (TargetModule: typeof modules[number]) => {
     ctx.registModule(new TargetModule());

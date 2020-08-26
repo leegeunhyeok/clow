@@ -1,5 +1,5 @@
 import { G, Rect, Circle, Ellipse } from '@svgdotjs/svg.js';
-import ClowContext from '../../ClowContext';
+import ctx from '../../ClowContext';
 import ModuleConnector from './ModuleConnector';
 import DataTypes from './Types';
 
@@ -42,17 +42,15 @@ export default class CrawlyModule {
   public inputType: DataTypes | DataTypes[];
   public outputType: DataTypes | DataTypes[];
   protected data: ModuleData = {};
-  protected ctx: ClowContext;
   protected g: G;
   protected graphic?: Graphics;
   protected connectors: ModuleConnector[] = [];
   private components: UIComponent[] = [];
 
   constructor(x = 100, y = 100) {
-    this.ctx = ClowContext.getInstance();
     this.x = x;
     this.y = y;
-    this.g = this.ctx.getSvg().group();
+    this.g = ctx.getSvg().group();
     this.inputType = DataTypes.NULL;
     this.outputType = DataTypes.NULL;
   }
@@ -76,31 +74,31 @@ export default class CrawlyModule {
 
     this.g.attr({ style: `color:${textColor}` });
     this.g.on('mousedown', () => {
-      this.ctx.focusedModule = this;
+      ctx.focusedModule = this;
       this.g.findOne('foreignObject').addClass('grap');
     });
 
     this.g.on('mouseup', () => {
-      this.ctx.focusedModule = null;
+      ctx.focusedModule = null;
       this.g.findOne('foreignObject').removeClass('grap');
     });
 
     this.g.on('mouseover', () => {
-      if (this.ctx.isConnecting) {
+      if (ctx.isConnecting) {
         graphic.transform({ scale: 1.1 });
       }
     });
 
     this.g.on('mouseleave', () => {
-      if (this.ctx.isConnecting) {
+      if (ctx.isConnecting) {
         this.resetConnection();
       }
     });
 
     this.g.on('click', () => {
-      if (this.ctx.isConnecting && !this.inConnectRelation) {
+      if (ctx.isConnecting && !this.inConnectRelation) {
         this.inConnectRelation = true;
-        this.ctx.connectRelation(this);
+        ctx.connectRelation(this);
       }
     });
 
@@ -128,7 +126,7 @@ export default class CrawlyModule {
     deleteButton.textContent = 'x';
     deleteButton.classList.add('close');
     deleteButton.addEventListener('click', () => {
-      this.ctx.unregistModule(this);
+      ctx.unregistModule(this);
     });
 
     const wrap = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');

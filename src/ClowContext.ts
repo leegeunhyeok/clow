@@ -7,17 +7,18 @@ interface Point {
   y: number;
 }
 
-interface ContextEventHandlerStore {
-  [key: string]: Function | undefined;
+export enum ClowEvent {
+  CONNECTING_STATE_CHANGE,
+  NOT_CONNECTABLE,
 }
 
-export default class CanvasContext {
-  private static instance: CanvasContext;
+class ClowContext {
+  private static instance: ClowContext;
   private svg?: Svg;
   private cursorPosition: Point = { x: 0, y: 0 };
   private connectorGroup?: G;
   private connectorShadow?: G;
-  private onEvent: ContextEventHandlerStore = {};
+  private onEvent: Map<ClowEvent, Function[]> = new Map();
   private modules: ClowModule[] = [];
   public focusedModule: ClowModule | null = null;
   public isConnecting: boolean = false;
@@ -25,20 +26,21 @@ export default class CanvasContext {
   public connectingTo?: ClowModule | null;
 
   private constructor() {
-    CanvasContext.instance = this;
+    ClowContext.instance = this;
   }
 
   // Singleton
   public static getInstance() {
-    if (!CanvasContext.instance) {
-      CanvasContext.instance = new CanvasContext();
+    if (!ClowContext.instance) {
+      ClowContext.instance = new ClowContext();
     }
     return this.instance;
   }
 
-  private callEventHandler(eventType: string, value?: any) {
-    const handler = this.onEvent[eventType];
-    handler && handler(value);
+  private dispatchEvent(eventType: ClowEvent, value?: any) {
+    if (this.onEvent.has(eventType)) {
+      this.onEvent.get(eventType)!.forEach((f) => f(value));
+    }
   }
 
   init(container: HTMLElement) {
@@ -106,7 +108,7 @@ export default class CanvasContext {
   connecting(state: boolean) {
     this.isConnecting = state;
     this.initConnection();
-    this.callEventHandler('connectingstatechange', state);
+    this.dispatchEvent(ClowEvent.CONNECTING_STATE_CHANGE, state);
   }
 
   connectRelation(clowModule: ClowModule) {
@@ -135,7 +137,7 @@ export default class CanvasContext {
     } else if (this.connectingFrom.isConnectable(clowModule)) {
       this.connectingTo = clowModule;
     } else {
-      this.callEventHandler('notconnectable');
+      this.dispatchEvent(ClowEvent.NOT_CONNECTABLE);
       return;
     }
 
@@ -145,7 +147,21 @@ export default class CanvasContext {
     }
   }
 
-  on(eventType: string, f: Function) {
-    this.onEvent[eventType] = f;
+  on(eventType: ClowEvent, f: Function) {
+    if (this.onEvent.has(eventType)) {
+      this.onEvent.get(eventType)!.push(f);
+    } else {
+      this.onEvent.set(eventType, [f]);
+    }
+  }
+
+  off(eventType: ClowEvent, f: Function) {
+    const callbackList = this.onEvent.get(eventType)!;
+    const idx = callbackList.findIndex((x) => x === f);
+    if (!~idx) {
+      callbackList.splice(idx, 1);
+    }
   }
 }
+
+export default ClowContext.getInstance();
