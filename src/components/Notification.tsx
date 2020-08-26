@@ -1,23 +1,37 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import './Notification.scss';
 
 export enum LEVEL {
-  DEBUG,
-  INFO,
-  SUCCESS,
-  WARNING,
-  ERROR,
-  CRITICAL,
+  INFO = 'info',
+  SUCCESS = 'success',
+  WARNING = 'warning',
+  ERROR = 'error',
 }
 
 type NotificationProps = {
   message: string;
   level?: LEVEL;
+  keep?: number;
+  onClose: Function;
 };
 
 const Notification = (props: NotificationProps) => {
-  const onClose = () => {};
+  let timer = 0;
+  useEffect(() => {
+    timer = window.setTimeout(() => {
+      props.onClose();
+    }, (props.keep ?? 3) * 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <div className="Notification" onClick={onClose}>
+    <div
+      className={props.level ? 'Notification--' + props.level : 'Notification'}
+      onClick={() => {
+        clearTimeout(timer);
+        props.onClose();
+      }}
+    >
       {props.message}
     </div>
   );

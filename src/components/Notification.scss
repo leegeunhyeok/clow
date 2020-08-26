@@ -1,0 +1,35 @@
+.Notification {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  padding: 1rem;
+  width: 100%;
+  max-width: 400px;
+  border-radius: 2rem;
+  background-color: #fff;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1rem;
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.2);
+  transform: translate(-50%, 0);
+
+  &--info {
+    @extend .Notification;
+    color: #111;
+  }
+
+  &--success {
+    @extend .Notification;
+    color: #4caf50;
+  }
+
+  &--warning {
+    @extend .Notification;
+    color: #ffc107;
+  }
+
+  &--info {
+    @extend .Notification;
+    color: #f44336;
+  }
+}
