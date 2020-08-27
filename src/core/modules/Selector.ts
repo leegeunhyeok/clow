@@ -1,7 +1,7 @@
-import ClowModule from './common/ClowModule';
-import DataTypes from './common/Types';
+import Module from 'src/core/common/module';
+import { DataTypes } from 'src/core/common';
 
-export default class Selector extends ClowModule {
+export default class Selector extends Module {
   static COLOR = '#2196f3';
   static TEXT_COLOR = '#ffffff';
   inputType = [DataTypes.PAGE, DataTypes.ELEMENT];

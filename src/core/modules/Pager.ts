@@ -1,7 +1,7 @@
-import ClowModule from './common/ClowModule';
-import DataTypes from './common/Types';
+import Module from 'src/core/common/module';
+import { DataTypes } from 'src/core/common';
 
-export default class Pager extends ClowModule {
+export default class Pager extends Module {
   static COLOR = '#cfd8dc';
   inputType = DataTypes.STRING;
   outputType = DataTypes.PAGE;

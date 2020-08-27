@@ -1,6 +1,7 @@
 import { G } from '@svgdotjs/svg.js';
-import ctx from '../../ClowContext';
-import ClowModule from './ClowModule';
+import { Initable } from 'src/core/common';
+import Module from 'src/core/common/module';
+import Context from 'src/core/context';
 
 interface ConnectorLinePosition {
   x1: number;
@@ -9,38 +10,46 @@ interface ConnectorLinePosition {
   y2: number;
 }
 
-class ModuleConnector {
+class Connector implements Initable {
   public static HEAD_SIZE = 20;
   public static LINE_WIDTH = 3;
+  public static COLOR = '#999999';
+  public static SHADOW_COLOR = '#cccccc';
   public id = 'connector_' + +new Date();
-  protected from: ClowModule;
-  protected to: ClowModule;
-  protected g: G;
+  protected from: Module;
+  protected to: Module;
+  protected g?: G;
 
-  constructor(from: ClowModule, to: ClowModule) {
+  constructor(from: Module, to: Module) {
     this.from = from;
     this.to = to;
+  }
+
+  init(ctx: Context) {
     const connectorGroup = ctx.getConnectorGroup();
     const lineGroup = connectorGroup.group();
-    const pos = this.getConnectorPosition();
     lineGroup
-      .line(pos.x1, pos.y1, pos.x2, pos.y2)
-      .stroke({ color: '#999', width: ModuleConnector.LINE_WIDTH, linecap: 'round' })
+      .stroke({ color: Connector.COLOR, width: Connector.LINE_WIDTH, linecap: 'round' })
       .attr({ class: 'connector' });
     lineGroup
-      .circle(ModuleConnector.HEAD_SIZE)
-      .attr({ cx: pos.x1, cy: pos.y1 })
-      .attr({ fill: (from.constructor as typeof ClowModule).COLOR });
+      .circle(Connector.HEAD_SIZE)
+      .attr({ fill: (this.from.constructor as typeof Module).COLOR });
     lineGroup.on('click', () => {
       this.destroy();
     });
     this.g = lineGroup;
+    this.update();
+    return this;
+  }
+
+  isConnectedWith(targetModule: Module) {
+    return this.to === targetModule || this.from === targetModule;
   }
 
   update() {
     const pos = this.getConnectorPosition();
-    const line = this.g.findOne('line');
-    const lineHead = this.g.findOne('circle');
+    const line = this.g!.findOne('line');
+    const lineHead = this.g!.findOne('circle');
     line.attr({ ...pos });
     lineHead.attr({ cx: pos.x1, cy: pos.y1 });
   }
@@ -62,19 +71,19 @@ class ModuleConnector {
       // Vertical relation
       if (pos.y1 > pos.y2) {
         pos.y1 = pos.y1 - this.from.getGraphic().height() / 2;
-        pos.y2 = pos.y2 + this.to.getGraphic().height() / 2 - ModuleConnector.LINE_WIDTH;
+        pos.y2 = pos.y2 + this.to.getGraphic().height() / 2 - Connector.LINE_WIDTH;
       } else {
         pos.y1 = pos.y1 + this.from.getGraphic().height() / 2;
-        pos.y2 = pos.y2 - this.to.getGraphic().height() / 2 + ModuleConnector.LINE_WIDTH;
+        pos.y2 = pos.y2 - this.to.getGraphic().height() / 2 + Connector.LINE_WIDTH;
       }
     } else {
       // Horizontal relation
       if (pos.x1 > pos.x2) {
         pos.x1 = pos.x1 - this.from.getGraphic().width() / 2;
-        pos.x2 = pos.x2 + this.to.getGraphic().width() / 2 - ModuleConnector.LINE_WIDTH;
+        pos.x2 = pos.x2 + this.to.getGraphic().width() / 2 - Connector.LINE_WIDTH;
       } else {
         pos.x1 = pos.x1 + this.from.getGraphic().width() / 2;
-        pos.x2 = pos.x2 - this.to.getGraphic().width() / 2 + ModuleConnector.LINE_WIDTH;
+        pos.x2 = pos.x2 - this.to.getGraphic().width() / 2 + Connector.LINE_WIDTH;
       }
     }
 
@@ -84,8 +93,8 @@ class ModuleConnector {
   destroy() {
     this.from.disconnect(this);
     this.to.disconnect(this);
-    this.g.remove();
+    this.g!.remove();
   }
 }
 
-export default ModuleConnector;
+export default Connector;

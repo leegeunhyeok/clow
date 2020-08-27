@@ -1,6 +1,6 @@
 import { SVG, Svg, G } from '@svgdotjs/svg.js';
-import ClowModule from './modules/common/ClowModule';
-import ModuleConnector from './modules/common/ModuleConnector';
+import Module from 'src/core/common/module';
+import Connector from 'src/core/common/connector';
 
 interface Point {
   x: number;
@@ -10,20 +10,21 @@ interface Point {
 export enum ClowEvent {
   CONNECTING_STATE_CHANGE,
   NOT_CONNECTABLE,
+  ALREADY_CONNECTED,
 }
 
-class ClowContext {
+export default class ClowContext {
   private static instance: ClowContext;
   private svg?: Svg;
   private cursorPosition: Point = { x: 0, y: 0 };
   private connectorGroup?: G;
   private connectorShadow?: G;
   private onEvent: Map<ClowEvent, Function[]> = new Map();
-  private modules: ClowModule[] = [];
-  public focusedModule: ClowModule | null = null;
+  private modules: Module[] = [];
+  public focusedModule: Module | null = null;
   public isConnecting: boolean = false;
-  public connectingFrom?: ClowModule | null;
-  public connectingTo?: ClowModule | null;
+  public connectingFrom?: Module | null;
+  public connectingTo?: Module | null;
 
   private constructor() {
     ClowContext.instance = this;
@@ -37,7 +38,7 @@ class ClowContext {
     return this.instance;
   }
 
-  private dispatchEvent(eventType: ClowEvent, value?: any) {
+  private dispatchEvent<T>(eventType: ClowEvent, value?: T) {
     if (this.onEvent.has(eventType)) {
       this.onEvent.get(eventType)!.forEach((f) => f(value));
     }
@@ -83,35 +84,35 @@ class ClowContext {
     return this.connectorGroup as G;
   }
 
-  registModule(clowModule: ClowModule) {
-    clowModule.init();
+  registModule(clowModule: Module) {
+    clowModule.init(this);
     this.modules.push(clowModule);
   }
 
-  unregistModule(clowModule: ClowModule) {
+  unregistModule(clowModule: Module) {
     const idx = this.modules.findIndex((x) => x === clowModule);
     this.modules.splice(idx, 1);
     clowModule.destroy();
   }
 
-  private initConnection() {
-    if (this.connectingFrom) {
-      this.connectingFrom.resetConnection();
-    }
-    if (this.connectingTo) {
-      this.connectingTo.resetConnection();
-    }
+  setAsFocusedModule(clowModule: Module | null) {
+    this.focusedModule = clowModule;
+  }
+
+  private prepareConnection() {
+    this.connectingFrom && this.connectingFrom.initConnection();
+    this.connectingTo && this.connectingTo.initConnection();
     this.connectorShadow = void (this.connectorShadow && this.connectorShadow.remove());
     this.connectingFrom = this.connectingTo = null;
   }
 
   connecting(state: boolean) {
     this.isConnecting = state;
-    this.initConnection();
-    this.dispatchEvent(ClowEvent.CONNECTING_STATE_CHANGE, state);
+    this.prepareConnection();
+    this.dispatchEvent<boolean>(ClowEvent.CONNECTING_STATE_CHANGE, state);
   }
 
-  connectRelation(clowModule: ClowModule) {
+  connectRelation(clowModule: Module) {
     if (!this.connectingFrom) {
       const connectorGroup = this.getConnectorGroup();
       const lineGroup = connectorGroup.group();
@@ -124,8 +125,8 @@ class ClowContext {
       lineGroup
         .line(pos.x1, pos.y1, pos.x2, pos.y2)
         .stroke({
-          color: '#dddddd',
-          width: ModuleConnector.LINE_WIDTH,
+          color: Connector.SHADOW_COLOR,
+          width: Connector.LINE_WIDTH,
           linecap: 'round',
         })
         .attr({
@@ -134,16 +135,22 @@ class ClowContext {
         });
       this.connectorShadow = lineGroup;
       this.connectingFrom = clowModule;
-    } else if (this.connectingFrom.isConnectable(clowModule)) {
-      this.connectingTo = clowModule;
-    } else {
-      this.dispatchEvent(ClowEvent.NOT_CONNECTABLE);
       return;
     }
 
+    if (this.connectingFrom.isConnectedWith(clowModule)) {
+      return this.dispatchEvent<Module>(ClowEvent.ALREADY_CONNECTED, clowModule);
+    } else if (!this.connectingFrom.isConnectable(clowModule)) {
+      return this.dispatchEvent<Module>(ClowEvent.NOT_CONNECTABLE, clowModule);
+    } else {
+      this.connectingTo = clowModule;
+    }
+
     if (this.connectingFrom && this.connectingTo) {
-      this.connectingFrom.connect(this.connectingTo);
-      this.initConnection();
+      const connector = new Connector(this.connectingFrom, this.connectingTo).init(this);
+      this.connectingFrom.connect(connector);
+      this.connectingTo.connect(connector);
+      this.prepareConnection();
     }
   }
 
@@ -163,5 +170,3 @@ class ClowContext {
     }
   }
 }
-
-export default ClowContext.getInstance();

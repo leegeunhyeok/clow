@@ -1,7 +1,7 @@
 import { G, Rect, Circle, Ellipse } from '@svgdotjs/svg.js';
-import ctx from '../../ClowContext';
-import ModuleConnector from './ModuleConnector';
-import DataTypes from './Types';
+import { DataTypes, Initable, Connectable } from 'src/core/common';
+import Connector from 'src/core/common/connector';
+import Context from 'src/core/context';
 
 interface ModuleData {
   [key: string]: string | number | boolean;
@@ -25,7 +25,7 @@ interface UIComponent {
 
 export type Graphics = Rect | Circle | Ellipse;
 
-export default class CrawlyModule {
+export default class Module implements Initable, Connectable {
   public static COLOR = '#ffffff';
   public static TEXT_COLOR = '#000000';
   public static CELL_SIZE = 12;
@@ -38,19 +38,18 @@ export default class CrawlyModule {
   public row = 0;
   public width = 0;
   public height = 0;
-  public inConnectRelation = false;
   public inputType: DataTypes | DataTypes[];
   public outputType: DataTypes | DataTypes[];
   protected data: ModuleData = {};
-  protected g: G;
+  protected g?: G;
   protected graphic?: Graphics;
-  protected connectors: ModuleConnector[] = [];
   private components: UIComponent[] = [];
+  public inConnectRelation = false;
+  public connectors: Connector[] = [];
 
   constructor(x = 100, y = 100) {
     this.x = x;
     this.y = y;
-    this.g = ctx.getSvg().group();
     this.inputType = DataTypes.NULL;
     this.outputType = DataTypes.NULL;
   }
@@ -65,37 +64,38 @@ export default class CrawlyModule {
     });
   }
 
-  init() {
-    this.width = this.column * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2;
-    this.height = this.row * CrawlyModule.CELL_SIZE + CrawlyModule.RENDER_PADDING * 2;
-    const color = (this.constructor as typeof CrawlyModule).COLOR;
-    const textColor = (this.constructor as typeof CrawlyModule).TEXT_COLOR;
-    const graphic = this.g.rect(this.width, this.height).radius(8).fill(color);
+  init(ctx: Context) {
+    const g = ctx.getSvg().group();
+    this.width = this.column * Module.CELL_SIZE + Module.RENDER_PADDING * 2;
+    this.height = this.row * Module.CELL_SIZE + Module.RENDER_PADDING * 2;
+    const color = (this.constructor as typeof Module).COLOR;
+    const textColor = (this.constructor as typeof Module).TEXT_COLOR;
+    const graphic = g.rect(this.width, this.height).radius(8).fill(color);
 
-    this.g.attr({ style: `color:${textColor}` });
-    this.g.on('mousedown', () => {
-      ctx.focusedModule = this;
-      this.g.findOne('foreignObject').addClass('grap');
+    g.attr({ style: `color:${textColor}` });
+    g.on('mousedown', () => {
+      ctx.setAsFocusedModule(this);
+      g.findOne('foreignObject').addClass('grap');
     });
 
-    this.g.on('mouseup', () => {
-      ctx.focusedModule = null;
-      this.g.findOne('foreignObject').removeClass('grap');
+    g.on('mouseup', () => {
+      ctx.setAsFocusedModule(null);
+      g.findOne('foreignObject').removeClass('grap');
     });
 
-    this.g.on('mouseover', () => {
+    g.on('mouseover', () => {
       if (ctx.isConnecting) {
         graphic.transform({ scale: 1.1 });
       }
     });
 
-    this.g.on('mouseleave', () => {
+    g.on('mouseleave', () => {
       if (ctx.isConnecting) {
-        this.resetConnection();
+        this.initConnection();
       }
     });
 
-    this.g.on('click', () => {
+    g.on('click', () => {
       if (ctx.isConnecting && !this.inConnectRelation) {
         this.inConnectRelation = true;
         ctx.connectRelation(this);
@@ -105,22 +105,7 @@ export default class CrawlyModule {
     const foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
     foreignObject.setAttribute('width', this.width.toString());
     foreignObject.setAttribute('height', this.height.toString());
-
-    const componentList = [];
-    for (const component of this.components) {
-      const el = this.createElementFromDOMConfig(component.template);
-      el.setAttribute(
-        'style',
-        `
-        top:${component.row * CrawlyModule.CELL_SIZE + CrawlyModule.COMPONENT_MARGIN}px;
-        left:${component.column * CrawlyModule.CELL_SIZE + CrawlyModule.COMPONENT_MARGIN}px;
-        width:${component.width * CrawlyModule.CELL_SIZE - CrawlyModule.COMPONENT_MARGIN * 2}px;
-        height:${component.height * CrawlyModule.CELL_SIZE - CrawlyModule.COMPONENT_MARGIN * 2}px;
-        ${el.getAttribute('style') || ''};
-      `.replace(/\s/g, ''),
-      );
-      componentList.push(el);
-    }
+    g.node.appendChild(foreignObject);
 
     const deleteButton = document.createElement('button');
     deleteButton.textContent = 'x';
@@ -130,32 +115,36 @@ export default class CrawlyModule {
     });
 
     const wrap = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
+    foreignObject.appendChild(wrap);
     wrap.setAttribute(
       'style',
-      `
-      position:relative;
-      margin:${CrawlyModule.RENDER_PADDING}px;
-      width:0px;
-      height:0px;
-    `.replace(/\s/g, ''),
+      `position:relative;margin:${Module.RENDER_PADDING}px;width:0px;height:0px;`,
     );
-
     wrap.appendChild(deleteButton);
 
-    for (const componentEl of componentList) {
-      wrap.appendChild(componentEl);
-    }
+    this.components.forEach((component) => {
+      const el = this.createElementFromDOMConfig(component.template);
+      el.setAttribute(
+        'style',
+        `top:${component.row * Module.CELL_SIZE + Module.COMPONENT_MARGIN}px;\
+        left:${component.column * Module.CELL_SIZE + Module.COMPONENT_MARGIN}px;\
+        width:${component.width * Module.CELL_SIZE - Module.COMPONENT_MARGIN * 2}px;\
+        height:${component.height * Module.CELL_SIZE - Module.COMPONENT_MARGIN * 2}px;\
+        ${el.getAttribute('style') || ''};`,
+      );
+      wrap.appendChild(el);
+    });
 
-    foreignObject.appendChild(wrap);
-    this.g.node.appendChild(foreignObject);
-    this.update();
+    this.g = g;
     this.graphic = graphic;
+    this.update();
+    return this;
   }
 
   update() {
     const x = this.x - this.width / 2;
     const y = this.y - this.height / 2;
-    this.g.transform({
+    this.g!.transform({
       translateX: x,
       translateY: y,
     });
@@ -201,44 +190,42 @@ export default class CrawlyModule {
     return this.graphic as Graphics;
   }
 
-  isConnectable(to: CrawlyModule): boolean {
-    if (Array.isArray(this.outputType)) {
-      if (Array.isArray(to.inputType)) {
-        return this.outputType.some((x) => (to.inputType as DataTypes[]).includes(x));
-      } else {
-        return !!this.outputType.find((x) => x === to.inputType);
-      }
-    } else {
-      if (Array.isArray(to.inputType)) {
-        return !!to.inputType.find((x) => x === this.outputType);
-      } else {
-        return this.outputType === to.inputType;
-      }
-    }
+  destroy() {
+    [...this.connectors].forEach((connector) => connector.destroy());
+    this.g!.remove();
   }
 
-  resetConnection() {
+  initConnection() {
     this.graphic && this.graphic.transform({ scale: 1 });
     this.inConnectRelation = false;
   }
 
-  connect(to: CrawlyModule) {
-    const connector = new ModuleConnector(this, to);
-    this.connectors.push(connector);
-    to.connectorFrom(connector);
+  isConnectedWith(targetModule: Module) {
+    return !!this.connectors.find((connector) => connector.isConnectedWith(targetModule));
   }
 
-  connectorFrom(connector: ModuleConnector) {
+  isConnectable(targetModule: Module): boolean {
+    if (Array.isArray(this.outputType)) {
+      if (Array.isArray(targetModule.inputType)) {
+        return this.outputType.some((x) => (targetModule.inputType as DataTypes[]).includes(x));
+      } else {
+        return !!this.outputType.find((x) => x === targetModule.inputType);
+      }
+    } else {
+      if (Array.isArray(targetModule.inputType)) {
+        return !!targetModule.inputType.find((x) => x === this.outputType);
+      } else {
+        return this.outputType === targetModule.inputType;
+      }
+    }
+  }
+
+  connect(connector: Connector) {
     this.connectors.push(connector);
   }
 
-  disconnect(connector: ModuleConnector) {
+  disconnect(connector: Connector) {
     const idx = this.connectors.findIndex((c) => c === connector);
-    this.connectors.splice(idx, 1);
-  }
-
-  destroy() {
-    [...this.connectors].forEach((connector) => connector.destroy());
-    this.g.remove();
+    if (~idx) this.connectors.splice(idx, 1);
   }
 }
