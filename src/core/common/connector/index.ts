@@ -28,17 +28,18 @@ class Connector implements Initable {
   init(ctx: Context) {
     const connectorGroup = ctx.getConnectorGroup();
     const lineGroup = connectorGroup.group();
+    const pos = this.getConnectorPosition();
     lineGroup
+      .line(pos.x1, pos.y1, pos.x2, pos.y2)
       .stroke({ color: Connector.COLOR, width: Connector.LINE_WIDTH, linecap: 'round' })
       .attr({ class: 'connector' });
     lineGroup
       .circle(Connector.HEAD_SIZE)
-      .attr({ fill: (this.from.constructor as typeof Module).COLOR });
+      .attr({ cx: pos.x1, cy: pos.y1, fill: (this.from.constructor as typeof Module).COLOR });
     lineGroup.on('click', () => {
       this.destroy();
     });
     this.g = lineGroup;
-    this.update();
     return this;
   }
 
