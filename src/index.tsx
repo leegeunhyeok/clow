@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import confitureStore from './store';
-import './index.scss';
+import confitureStore from 'src/store';
 import App from './App';
-import * as serviceWorker from './serviceWorker';
+import './index.scss';
+import * as serviceWorker from 'src/serviceWorker';
 import { Provider } from 'react-redux';
 
 const store = confitureStore();

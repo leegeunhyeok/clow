@@ -1,6 +1,6 @@
 import { Dispatch } from 'redux';
-import * as types from './types';
 import axios from 'axios';
+import * as types from './types';
 
 interface StartEngineAction {
   type: typeof types.START_ENGINE;

@@ -1,5 +1,5 @@
-import { EngineActions } from '../actions';
-import * as types from '../actions/types';
+import { EngineActions } from 'src/store/actions';
+import * as types from 'src/store/actions/types';
 
 export interface EngineState {
   loading: boolean;
