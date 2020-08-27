@@ -1,4 +1,4 @@
-.Notification {
+.Popup {
   position: fixed;
   top: 1rem;
   left: 50%;
@@ -12,24 +12,9 @@
   font-size: 1rem;
   box-shadow: 0 0 1rem rgba(0, 0, 0, 0.2);
   transform: translate(-50%, 0);
+  transition: 0.4s;
 
-  &--info {
-    @extend .Notification;
-    color: #111;
-  }
-
-  &--success {
-    @extend .Notification;
-    color: #4caf50;
-  }
-
-  &--warning {
-    @extend .Notification;
-    color: #ffc107;
-  }
-
-  &--info {
-    @extend .Notification;
-    color: #f44336;
+  &.hide {
+    transform: translate(-50%, -180%);
   }
 }
