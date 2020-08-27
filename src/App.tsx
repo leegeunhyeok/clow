@@ -1,14 +1,14 @@
 import React, { useRef, useEffect } from 'react';
 import './App.scss';
-import Toolbar from './components/Toolbar';
-import ctx from './ClowContext';
-
-import keyboard, { KeyCode } from './services/KeyboardService';
+import Context from 'src/core/context';
+import Toolbar from 'src/components/Toolbar';
+import keyboard, { KeyCode } from 'src/services/KeyboardService';
 
 const App = () => {
   const canvas = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const ctx = Context.getInstance();
     ctx.init(canvas.current as HTMLElement);
     const subscription = keyboard.on(KeyCode.Escape).subscribe(() => ctx.connecting(false));
     return () => {
