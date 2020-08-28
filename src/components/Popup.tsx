@@ -1,11 +1,14 @@
 import React from 'react';
 import './Popup.scss';
-import { usePopup } from 'src/hooks/usePopup';
 
-const Popup = () => {
-  const { message, close } = usePopup();
+interface PopupProps {
+  message?: string;
+  onClose?: Function;
+}
+
+const Popup = ({ message, onClose }: PopupProps) => {
   return (
-    <div className="Popup" onClick={() => close()}>
+    <div className="Popup" onClick={() => typeof onClose === 'function' && onClose()}>
       {message}
     </div>
   );

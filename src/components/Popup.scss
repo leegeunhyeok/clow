@@ -12,9 +12,19 @@
   font-size: 1rem;
   box-shadow: 0 0 1rem rgba(0, 0, 0, 0.2);
   transform: translate(-50%, 0);
-  transition: 0.4s;
+}
 
-  &.hide {
-    transform: translate(-50%, -180%);
-  }
+.popup-enter {
+  opacity: 0;
+}
+.popup-enter-active {
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+.popup-exit {
+  opacity: 1;
+}
+.popup-exit-active {
+  opacity: 0;
+  transition: opacity 0.2s;
 }

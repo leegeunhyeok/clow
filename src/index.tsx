@@ -5,12 +5,15 @@ import App from './App';
 import './index.scss';
 import * as serviceWorker from 'src/serviceWorker';
 import { Provider } from 'react-redux';
+import PopupContextProvider from 'src/providers/popup';
 
 const store = confitureStore();
 
 ReactDOM.render(
   <Provider store={store}>
-    <App />
+    <PopupContextProvider>
+      <App />
+    </PopupContextProvider>
   </Provider>,
   document.getElementById('root'),
 );

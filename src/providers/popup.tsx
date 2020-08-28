@@ -1,4 +1,4 @@
-import React, { createContext, useState, ReactNode, useCallback } from 'react';
+import React, { useState, useRef, ReactNode, useCallback, createContext } from 'react';
 
 interface PopupContextProviderProps {
   children: ReactNode;
@@ -18,33 +18,35 @@ export const PopupContext = createContext<PopupContext>({
   close: () => {},
 });
 
-export const ANIMATION_DURATION = 500;
+export const TIMEOUT = 200;
 
 const PopupContextProvider = ({ children }: PopupContextProviderProps) => {
-  let timer = 0;
+  let timer = useRef(0);
   const [show, setShowState] = useState(false);
   const [message, setMessage] = useState('');
 
-  const open = (message: string) => {
-    clearTimeout(timer);
+  const open = useCallback((message: string) => {
+    clearTimeout(timer.current);
     if (show) {
       close();
-      timer = window.setTimeout(() => {
+      timer.current = window.setTimeout(() => {
         open(message);
-      }, ANIMATION_DURATION);
+      }, TIMEOUT);
     } else {
       setShowState(true);
       setMessage(message);
     }
-  };
+  }, []);
 
-  const close = () => setShowState(false);
+  const close = useCallback(() => {
+    setShowState(false);
+  }, []);
 
   const contextValue = {
     show,
     message,
-    open: useCallback((message: string) => open(message), []),
-    close: useCallback(() => close(), []),
+    open,
+    close,
   };
 
   return <PopupContext.Provider value={contextValue}>{children}</PopupContext.Provider>;
