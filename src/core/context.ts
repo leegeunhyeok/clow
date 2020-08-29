@@ -77,10 +77,8 @@ export default class ClowContext {
 
         if (this.focusedModule) {
           // TODO: Clicked offset caculate.
-          // this.focusedModule.x = x - this.focusedModuleOffset.x;
-          // this.focusedModule.y = y - this.focusedModuleOffset.y;
-          this.focusedModule.x = x;
-          this.focusedModule.y = y;
+          this.focusedModule.x = x - this.focusedModuleOffset.x;
+          this.focusedModule.y = y - this.focusedModuleOffset.y;
           this.focusedModule.update();
         }
       });

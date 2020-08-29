@@ -74,7 +74,10 @@ export default class Module implements Initable, Connectable {
 
     g.attr({ style: `color:${textColor}` });
     g.on('mousedown', (event: MouseEvent) => {
-      ctx.setAsFocusedModule(this, event.offsetX, event.offsetY);
+      console.log(event.target);
+      const halfWidth = this.width / 2;
+      const halfHeight = this.height / 2;
+      ctx.setAsFocusedModule(this, event.offsetX - halfWidth, event.offsetY - halfHeight);
       g.findOne('foreignObject').addClass('grap');
     });
 
