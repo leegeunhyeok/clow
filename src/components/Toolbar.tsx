@@ -1,20 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLink, faTimes, faArrowUp, faArrowDown } from '@fortawesome/free-solid-svg-icons';
 import './Toolbar.scss';
-import Context, { ClowEvent } from 'src/core/context';
+import Context, { ClowEventType } from 'src/core/context';
 import modules from 'src/core/modules';
 
 const Toolbar = () => {
-  const ctx = Context.getInstance();
+  const ctx = useRef(Context.getInstance());
   const [connecting, setConnectingState] = useState(false);
-  ctx.on(ClowEvent.CONNECTING_STATE_CHANGE, setConnectingState);
 
-  const createModule = (TargetModule: typeof modules[number]) => {
-    ctx.registModule(new TargetModule());
-  };
+  useEffect(() => {
+    ctx.current.on(ClowEventType.CONNECTING_STATE_CHANGE, ({ value }) => {
+      setConnectingState(value);
+    });
+  }, []);
 
-  const toggleConnection = () => ctx.connecting(!connecting);
+  const createModule = useCallback((TargetModule: typeof modules[number]) => {
+    ctx.current.registModule(new TargetModule());
+  }, []);
+
+  const toggleConnection = () => ctx.current.connecting(!connecting);
 
   const renderModuleButton = () => {
     return modules.map((module, i) => {
