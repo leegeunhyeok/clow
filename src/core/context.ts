@@ -7,11 +7,18 @@ interface Point {
   y: number;
 }
 
-export enum ClowEvent {
+export enum ClowEventType {
   CONNECTING_STATE_CHANGE,
   NOT_CONNECTABLE,
   ALREADY_CONNECTED,
 }
+
+export interface ClowEvent {
+  type: ClowEventType;
+  value?: any;
+}
+
+export type ClowEventHandler = (event: ClowEvent) => void;
 
 export default class ClowContext {
   private static instance: ClowContext;
@@ -19,7 +26,7 @@ export default class ClowContext {
   private cursorPosition: Point = { x: 0, y: 0 };
   private connectorGroup?: G;
   private connectorShadow?: G;
-  private onEvent: Map<ClowEvent, Function[]> = new Map();
+  private onEvent: Map<ClowEventType, ClowEventHandler[]> = new Map();
   private modules: Module[] = [];
   public focusedModule: Module | null = null;
   public isConnecting: boolean = false;
@@ -38,9 +45,13 @@ export default class ClowContext {
     return this.instance;
   }
 
-  private dispatchEvent<T>(eventType: ClowEvent, value?: T) {
+  private dispatchEvent<T>(eventType: ClowEventType, value?: T) {
     if (this.onEvent.has(eventType)) {
-      this.onEvent.get(eventType)!.forEach((f) => f(value));
+      const event: ClowEvent = {
+        type: eventType,
+        value,
+      };
+      this.onEvent.get(eventType)!.forEach((f) => f(event));
     }
   }
 
@@ -109,7 +120,7 @@ export default class ClowContext {
   connecting(state: boolean) {
     this.isConnecting = state;
     this.prepareConnection();
-    this.dispatchEvent<boolean>(ClowEvent.CONNECTING_STATE_CHANGE, state);
+    this.dispatchEvent<boolean>(ClowEventType.CONNECTING_STATE_CHANGE, state);
   }
 
   connectRelation(clowModule: Module) {
@@ -139,9 +150,9 @@ export default class ClowContext {
     }
 
     if (this.connectingFrom.isConnectedWith(clowModule)) {
-      return this.dispatchEvent<Module>(ClowEvent.ALREADY_CONNECTED, clowModule);
+      return this.dispatchEvent<Module>(ClowEventType.ALREADY_CONNECTED, clowModule);
     } else if (!this.connectingFrom.isConnectable(clowModule)) {
-      return this.dispatchEvent<Module>(ClowEvent.NOT_CONNECTABLE, clowModule);
+      return this.dispatchEvent<Module>(ClowEventType.NOT_CONNECTABLE, clowModule);
     } else {
       this.connectingTo = clowModule;
     }
@@ -154,15 +165,17 @@ export default class ClowContext {
     }
   }
 
-  on(eventType: ClowEvent, f: Function) {
+  on(eventType: ClowEventType, f: ClowEventHandler) {
     if (this.onEvent.has(eventType)) {
       this.onEvent.get(eventType)!.push(f);
     } else {
       this.onEvent.set(eventType, [f]);
     }
+
+    console.log(eventType, 'registered');
   }
 
-  off(eventType: ClowEvent, f: Function) {
+  off(eventType: ClowEventType, f: ClowEventHandler) {
     const callbackList = this.onEvent.get(eventType)!;
     const idx = callbackList.findIndex((x) => x === f);
     if (!~idx) {

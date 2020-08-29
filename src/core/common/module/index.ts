@@ -116,6 +116,7 @@ export default class Module implements Initable, Connectable {
 
     const wrap = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
     foreignObject.appendChild(wrap);
+    wrap.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
     wrap.setAttribute(
       'style',
       `position:relative;margin:${Module.RENDER_PADDING}px;width:0px;height:0px;`,
