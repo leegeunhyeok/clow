@@ -73,8 +73,8 @@ export default class Module implements Initable, Connectable {
     const graphic = g.rect(this.width, this.height).radius(8).fill(color);
 
     g.attr({ style: `color:${textColor}` });
-    g.on('mousedown', () => {
-      ctx.setAsFocusedModule(this);
+    g.on('mousedown', (event: MouseEvent) => {
+      ctx.setAsFocusedModule(this, event.offsetX, event.offsetY);
       g.findOne('foreignObject').addClass('grap');
     });
 
@@ -115,20 +115,24 @@ export default class Module implements Initable, Connectable {
     });
 
     const wrap = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
-    foreignObject.appendChild(wrap);
     wrap.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
     wrap.setAttribute(
       'style',
-      `position:relative;margin:${Module.RENDER_PADDING}px;width:0px;height:0px;`,
+      `position:relative;padding:${Module.RENDER_PADDING}px;width:${this.width}px;height:${this.height}px;`,
     );
+    foreignObject.appendChild(wrap);
     wrap.appendChild(deleteButton);
 
     this.components.forEach((component) => {
       const el = this.createElementFromDOMConfig(component.template);
       el.setAttribute(
         'style',
-        `top:${component.row * Module.CELL_SIZE + Module.COMPONENT_MARGIN}px;\
-        left:${component.column * Module.CELL_SIZE + Module.COMPONENT_MARGIN}px;\
+        `top:${
+          component.row * Module.CELL_SIZE + Module.COMPONENT_MARGIN + Module.RENDER_PADDING
+        }px;\
+        left:${
+          component.column * Module.CELL_SIZE + Module.COMPONENT_MARGIN + Module.RENDER_PADDING
+        }px;\
         width:${component.width * Module.CELL_SIZE - Module.COMPONENT_MARGIN * 2}px;\
         height:${component.height * Module.CELL_SIZE - Module.COMPONENT_MARGIN * 2}px;\
         ${el.getAttribute('style') || ''};`,

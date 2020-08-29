@@ -28,10 +28,11 @@ export default class ClowContext {
   private connectorShadow?: G;
   private onEvent: Map<ClowEventType, ClowEventHandler[]> = new Map();
   private modules: Module[] = [];
-  public focusedModule: Module | null = null;
+  private focusedModule: Module | null = null;
+  private focusedModuleOffset: Point = { x: 0, y: 0 };
+  private connectingFrom?: Module | null;
+  private connectingTo?: Module | null;
   public isConnecting: boolean = false;
-  public connectingFrom?: Module | null;
-  public connectingTo?: Module | null;
 
   private constructor() {
     ClowContext.instance = this;
@@ -75,6 +76,9 @@ export default class ClowContext {
         }
 
         if (this.focusedModule) {
+          // TODO: Clicked offset caculate.
+          // this.focusedModule.x = x - this.focusedModuleOffset.x;
+          // this.focusedModule.y = y - this.focusedModuleOffset.y;
           this.focusedModule.x = x;
           this.focusedModule.y = y;
           this.focusedModule.update();
@@ -106,8 +110,12 @@ export default class ClowContext {
     clowModule.destroy();
   }
 
-  setAsFocusedModule(clowModule: Module | null) {
+  setAsFocusedModule(clowModule: Module | null, offsetX = 0, offsetY = 0) {
     this.focusedModule = clowModule;
+    this.focusedModuleOffset = {
+      x: offsetX,
+      y: offsetY,
+    };
   }
 
   private prepareConnection() {
@@ -127,9 +135,10 @@ export default class ClowContext {
     if (!this.connectingFrom) {
       const connectorGroup = this.getConnectorGroup();
       const lineGroup = connectorGroup.group();
+      const { x, y } = clowModule;
       const pos = {
-        x1: clowModule.x,
-        y1: clowModule.y,
+        x1: x,
+        y1: y,
         x2: this.cursorPosition.x,
         y2: this.cursorPosition.y,
       };

@@ -24,3 +24,8 @@ export interface Connectable {
   connect(connector: Connector): void;
   disconnect(connector: Connector): void;
 }
+
+export interface Point {
+  x: number;
+  y: number;
+}
