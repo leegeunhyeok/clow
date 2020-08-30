@@ -1,5 +1,5 @@
 import { G, Rect, Circle, Ellipse } from '@svgdotjs/svg.js';
-import { DataTypes, Initable, Connectable } from 'src/core/common';
+import { DataTypes, Renderable, Connectable } from 'src/core/common';
 import Connector from 'src/core/common/connector';
 import Context from 'src/core/context';
 
@@ -25,7 +25,7 @@ interface UIComponent {
 
 export type Graphics = Rect | Circle | Ellipse;
 
-export default class Module implements Initable, Connectable {
+export default class Module implements Renderable, Connectable {
   public static COLOR = '#ffffff';
   public static TEXT_COLOR = '#000000';
   public static CELL_SIZE = 12;
@@ -41,9 +41,9 @@ export default class Module implements Initable, Connectable {
   public inputType: DataTypes | DataTypes[];
   public outputType: DataTypes | DataTypes[];
   protected data: ModuleData = {};
-  protected g?: G;
-  protected graphic?: Graphics;
   private components: UIComponent[] = [];
+  public g: G | null = null;
+  protected graphic: Graphics | null = null;
   public inConnectRelation = false;
   public connectors: Connector[] = [];
 
@@ -64,7 +64,7 @@ export default class Module implements Initable, Connectable {
     });
   }
 
-  init(ctx: Context) {
+  create(ctx: Context) {
     const g = ctx.getSvg().group();
     this.width = this.column * Module.CELL_SIZE + Module.RENDER_PADDING * 2;
     this.height = this.row * Module.CELL_SIZE + Module.RENDER_PADDING * 2;
@@ -188,14 +188,6 @@ export default class Module implements Initable, Connectable {
     }
 
     return el;
-  }
-
-  getSVG() {
-    return this.g as G;
-  }
-
-  getGraphic() {
-    return this.graphic as Graphics;
   }
 
   destroy() {

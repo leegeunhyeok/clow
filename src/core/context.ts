@@ -98,7 +98,7 @@ export default class ClowContext {
   }
 
   registModule(clowModule: Module) {
-    clowModule.init(this);
+    clowModule.create(this);
     this.modules.push(clowModule);
   }
 
@@ -165,7 +165,7 @@ export default class ClowContext {
     }
 
     if (this.connectingFrom && this.connectingTo) {
-      const connector = new Connector(this.connectingFrom, this.connectingTo).init(this);
+      const connector = new Connector(this.connectingFrom, this.connectingTo).create(this);
       this.connectingFrom.connect(connector);
       this.connectingTo.connect(connector);
       this.prepareConnection();
