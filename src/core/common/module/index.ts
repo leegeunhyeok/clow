@@ -82,6 +82,7 @@ export default class Module implements Renderable, Connectable {
 
     const deleteButton = document.createElement('button');
     deleteButton.textContent = 'x';
+    deleteButton.style.color = textColor;
     deleteButton.classList.add('close');
     deleteButton.addEventListener('click', () => {
       ctx.unregistModule(this);
