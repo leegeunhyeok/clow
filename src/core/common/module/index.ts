@@ -29,6 +29,7 @@ export default class Module implements Renderable, Connectable {
   public static COLOR = '#ffffff';
   public static TEXT_COLOR = '#000000';
   public static CELL_SIZE = 12;
+  public static HEADER_SIZE = 12;
   public static RENDER_PADDING = 5;
   public static COMPONENT_MARGIN = 2;
   public id = 'module_' + +new Date();
@@ -66,45 +67,13 @@ export default class Module implements Renderable, Connectable {
 
   create(ctx: Context) {
     const g = ctx.getSvg().group();
+    const heightSizeOffset = Module.RENDER_PADDING + Module.HEADER_SIZE;
     this.width = this.column * Module.CELL_SIZE + Module.RENDER_PADDING * 2;
-    this.height = this.row * Module.CELL_SIZE + Module.RENDER_PADDING * 2;
+    this.height = this.row * Module.CELL_SIZE + Module.RENDER_PADDING * 2 + heightSizeOffset;
     const color = (this.constructor as typeof Module).COLOR;
     const textColor = (this.constructor as typeof Module).TEXT_COLOR;
     const graphic = g.rect(this.width, this.height).radius(8).fill(color);
-
     g.attr({ style: `color:${textColor}` });
-    g.on('mousedown', (event: MouseEvent) => {
-      const offsetX = event.offsetX + (event.target as HTMLElement).offsetLeft;
-      const offsetY = event.offsetY + (event.target as HTMLElement).offsetTop;
-      const halfWidth = this.width / 2;
-      const halfHeight = this.height / 2;
-      ctx.setAsFocusedModule(this, offsetX - halfWidth, offsetY - halfHeight);
-      g.findOne('foreignObject').addClass('grap');
-    });
-
-    g.on('mouseup', () => {
-      ctx.setAsFocusedModule(null);
-      g.findOne('foreignObject').removeClass('grap');
-    });
-
-    g.on('mouseover', () => {
-      if (ctx.isConnecting) {
-        graphic.transform({ scale: 1.1 });
-      }
-    });
-
-    g.on('mouseleave', () => {
-      if (ctx.isConnecting) {
-        this.initConnection();
-      }
-    });
-
-    g.on('click', () => {
-      if (ctx.isConnecting && !this.inConnectRelation) {
-        this.inConnectRelation = true;
-        ctx.connectRelation(this);
-      }
-    });
 
     const foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
     foreignObject.setAttribute('width', this.width.toString());
@@ -124,6 +93,40 @@ export default class Module implements Renderable, Connectable {
       'style',
       `position:relative;padding:${Module.RENDER_PADDING}px;width:${this.width}px;height:${this.height}px;`,
     );
+
+    wrap.addEventListener('mousedown', (event: MouseEvent) => {
+      const offsetX = event.offsetX + (event.target as HTMLElement).offsetLeft;
+      const offsetY = event.offsetY + (event.target as HTMLElement).offsetTop;
+      const halfWidth = this.width / 2;
+      const halfHeight = this.height / 2;
+      ctx.setAsFocusedModule(this, offsetX - halfWidth, offsetY - halfHeight);
+      g.findOne('foreignObject').addClass('grap');
+    });
+
+    wrap.addEventListener('mouseup', () => {
+      ctx.setAsFocusedModule(null);
+      g.findOne('foreignObject').removeClass('grap');
+    });
+
+    wrap.addEventListener('mouseover', () => {
+      if (ctx.isConnecting) {
+        graphic.transform({ scale: 1.1 });
+      }
+    });
+
+    wrap.addEventListener('mouseleave', () => {
+      if (ctx.isConnecting) {
+        this.initConnection();
+      }
+    });
+
+    wrap.addEventListener('click', () => {
+      if (ctx.isConnecting && !this.inConnectRelation) {
+        this.inConnectRelation = true;
+        ctx.connectRelation(this);
+      }
+    });
+
     foreignObject.appendChild(wrap);
     wrap.appendChild(deleteButton);
 
@@ -132,7 +135,10 @@ export default class Module implements Renderable, Connectable {
       el.setAttribute(
         'style',
         `top:${
-          component.row * Module.CELL_SIZE + Module.COMPONENT_MARGIN + Module.RENDER_PADDING
+          component.row * Module.CELL_SIZE +
+          Module.COMPONENT_MARGIN +
+          Module.RENDER_PADDING +
+          heightSizeOffset
         }px;\
         left:${
           component.column * Module.CELL_SIZE + Module.COMPONENT_MARGIN + Module.RENDER_PADDING

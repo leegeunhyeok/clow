@@ -76,7 +76,6 @@ export default class ClowContext {
         }
 
         if (this.focusedModule) {
-          // TODO: Clicked offset caculate.
           this.focusedModule.x = x - this.focusedModuleOffset.x;
           this.focusedModule.y = y - this.focusedModuleOffset.y;
           this.focusedModule.update();
@@ -178,8 +177,6 @@ export default class ClowContext {
     } else {
       this.onEvent.set(eventType, [f]);
     }
-
-    console.log(eventType, 'registered');
   }
 
   off(eventType: ClowEventType, f: ClowEventHandler) {
