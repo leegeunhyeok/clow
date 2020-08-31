@@ -29,7 +29,7 @@ export default class Module implements Renderable, Connectable {
   public static COLOR = '#ffffff';
   public static TEXT_COLOR = '#000000';
   public static CELL_SIZE = 12;
-  public static HEADER_SIZE = 12;
+  public static HEADER_SIZE = 18;
   public static RENDER_PADDING = 5;
   public static COMPONENT_MARGIN = 2;
   public id = 'module_' + +new Date();
@@ -72,7 +72,7 @@ export default class Module implements Renderable, Connectable {
     this.height = this.row * Module.CELL_SIZE + Module.RENDER_PADDING * 2 + heightSizeOffset;
     const color = (this.constructor as typeof Module).COLOR;
     const textColor = (this.constructor as typeof Module).TEXT_COLOR;
-    const graphic = g.rect(this.width, this.height).radius(8).fill(color);
+    const graphic = g.rect(this.width, this.height).radius(14).fill(color);
     g.attr({ style: `color:${textColor}` });
 
     const foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
@@ -168,6 +168,7 @@ export default class Module implements Renderable, Connectable {
 
   private createElementFromDOMConfig(config: DOMConfig) {
     const el = document.createElement(config.type);
+    const isInput = config.type === 'input';
 
     if (config.text) {
       el.appendChild(document.createTextNode(config.text));
@@ -179,12 +180,18 @@ export default class Module implements Renderable, Connectable {
       }
     }
 
-    if (config.on) {
+    if (config.on || isInput) {
       for (const event in config.on) {
         el.addEventListener(event, (e: Event) => {
           config.on && config.on[event](e);
         });
       }
+    }
+
+    if (isInput) {
+      el.addEventListener('mousemove', (e: MouseEvent) => {
+        e.stopPropagation();
+      });
     }
 
     if (config.children && config.children.length > 0) {
