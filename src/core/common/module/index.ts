@@ -74,10 +74,11 @@ export default class Module implements Renderable, Connectable {
 
     g.attr({ style: `color:${textColor}` });
     g.on('mousedown', (event: MouseEvent) => {
-      console.log(event.target);
+      const offsetX = event.offsetX + (event.target as HTMLElement).offsetLeft;
+      const offsetY = event.offsetY + (event.target as HTMLElement).offsetTop;
       const halfWidth = this.width / 2;
       const halfHeight = this.height / 2;
-      ctx.setAsFocusedModule(this, event.offsetX - halfWidth, event.offsetY - halfHeight);
+      ctx.setAsFocusedModule(this, offsetX - halfWidth, offsetY - halfHeight);
       g.findOne('foreignObject').addClass('grap');
     });
 
@@ -175,7 +176,6 @@ export default class Module implements Renderable, Connectable {
     if (config.on) {
       for (const event in config.on) {
         el.addEventListener(event, (e: Event) => {
-          e.stopPropagation();
           config.on && config.on[event](e);
         });
       }
