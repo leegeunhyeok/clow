@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
+import Button from 'src/components/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLink, faTimes, faArrowUp, faArrowDown } from '@fortawesome/free-solid-svg-icons';
 import Context, { ClowEventType } from 'src/core/context';
@@ -23,14 +24,16 @@ const ToolbarComponent = () => {
 
   const renderModuleButton = () => {
     return modules.map((module, i) => {
-      const style = {
-        color: module.TEXT_COLOR,
-        backgroundColor: module.COLOR,
-      };
       return (
-        <ToolbarButton style={style} key={i} onClick={() => createModule(module)}>
+        <Button
+          color={module.COLOR}
+          textColor={module.TEXT_COLOR}
+          margin={{ left: 12 }}
+          onClick={() => createModule(module)}
+          key={i}
+        >
           {module.name}
-        </ToolbarButton>
+        </Button>
       );
     });
   };
@@ -39,13 +42,13 @@ const ToolbarComponent = () => {
     <Toolbar>
       <ToolbarControl>{renderModuleButton()}</ToolbarControl>
       <ToolbarControl fixed={true}>
-        <ToolbarButton padding={0} width={32} height={32} onClick={() => toggleConnection()}>
+        <ToolbarButton onClick={() => toggleConnection()}>
           <FontAwesomeIcon icon={connecting ? faTimes : faLink} />
         </ToolbarButton>
-        <ToolbarButton padding={0} width={32} height={32}>
+        <ToolbarButton>
           <FontAwesomeIcon icon={faArrowUp} />
         </ToolbarButton>
-        <ToolbarButton padding={0} width={32} height={32}>
+        <ToolbarButton>
           <FontAwesomeIcon icon={faArrowDown} />
         </ToolbarButton>
       </ToolbarControl>
@@ -79,9 +82,9 @@ const ToolbarControl = styled('div')<{ fixed?: boolean }>`
         overflow: hidden;margin-left: 0.5rem;`}
 `;
 
-const ToolbarButton = styled('button')<{ width?: number; height?: number; padding?: number }>`
+const ToolbarButton = styled('button')`
+  padding: 0;
   margin-right: 0.5rem;
-  ${(props) => props.padding !== undefined && `padding: ${props.padding}px`};
-  ${(props) => props.width !== undefined && `width: ${props.width}px`};
-  ${(props) => props.height !== undefined && `height: ${props.height}px`};
+  width: 32px;
+  height: 32px;
 `;
