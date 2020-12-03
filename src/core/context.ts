@@ -171,6 +171,10 @@ export default class ClowContext {
     }
   }
 
+  export() {
+    console.log(this.modules);
+  }
+
   on(eventType: ClowEventType, f: ClowEventHandler) {
     if (this.onEvent.has(eventType)) {
       this.onEvent.get(eventType)!.push(f);

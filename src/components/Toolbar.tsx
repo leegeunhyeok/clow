@@ -51,6 +51,9 @@ const ToolbarComponent = () => {
         <ToolbarButton>
           <FontAwesomeIcon icon={faArrowDown} />
         </ToolbarButton>
+        <ToolbarButton>
+          <FontAwesomeIcon icon={faArrowDown} onClick={() => Context.getInstance().export()} />
+        </ToolbarButton>
       </ToolbarControl>
     </Toolbar>
   );
