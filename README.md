@@ -42,6 +42,11 @@ npm run start
 npm run build
 ```
 
+```bash
+pyenv virtualenv 3.8.5 clow
+pyenv activate clow
+```
+
 ## Resource
 
 - Logo: [Icon](https://material.io/resources/icons/?search=water&icon=invert_colors&style=baseline) customized, (Colors: #3B3B3B, #2B78FE)

@@ -17,11 +17,19 @@ class SocketManager {
   }
 
   public connect() {
-    this._socket = io();
+    this._socket = io('http://localhost:5000', {
+      extraHeaders: {
+        'Access-Control-Allow-Origin': '*',
+      },
+    });
   }
 
   public disconnect() {
     this._socket && this._socket.disconnect();
+  }
+
+  public send<T>(event: string, ...data: T[]) {
+    this._socket && this._socket.emit(event, data);
   }
 }
 

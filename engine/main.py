@@ -19,7 +19,9 @@ SOFTWARE.
 '''
 import argparse
 from flask import Flask
-from api import init
+from flask_cors import CORS
+from api import init as api_init
+from socket_io import init as socket_init
 
 parser = argparse.ArgumentParser(description='Clow server/engine agent.')
 parser.add_argument('--host', dest='host', type=str, default='local', choices=['local', 'external'],
@@ -30,8 +32,9 @@ parser.add_argument('--debug', dest='debug', type=int, default=False, choices=[0
                     help='Enable debug mode (default: 0, disabled)')
 args = parser.parse_args()
 app = Flask(__name__)
-init(app)
+CORS(app)
 
 if __name__ == '__main__':
-    host = '0.0.0.0' if args.host == 'external' else None
-    app.run(host=host, port=args.port, debug=args.debug)
+    api_init(app)
+    socket_init(app)
+    app.run(host='0.0.0.0' if args.host == 'external' else None, port=args.port, debug=args.debug)

@@ -8,6 +8,7 @@ import keyboard, { KeyCode } from 'src/services/KeyboardService';
 import { usePopup } from 'src/hooks/usePopup';
 import { TIMEOUT } from 'src/providers/popup';
 import { getMessageFromEvent } from 'src/messages';
+import { socket } from './core/socket';
 
 const GlobalStyle = createGlobalStyle`
   @font-face {
@@ -148,6 +149,11 @@ const App = () => {
     const subscription = keyboard.on(KeyCode.Escape).subscribe(() => ctx.connecting(false));
     return () => subscription.unsubscribe();
   }, [open]);
+
+  useEffect(() => {
+    socket.connect();
+    socket.send('test', { a: 1 });
+  }, []);
 
   return (
     <div ref={canvas} className="App">
