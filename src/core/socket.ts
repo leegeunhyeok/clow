@@ -17,10 +17,11 @@ class SocketManager {
   }
 
   public connect() {
-    this._socket = io('http://localhost:5000', {
-      extraHeaders: {
-        'Access-Control-Allow-Origin': '*',
-      },
+    if (this._socket) return;
+    this._socket = io('ws://localhost:5000', { transports: ['websocket'], upgrade: false });
+    this._socket.connect();
+    this._socket.on('connect', () => {
+      console.log(this._socket);
     });
   }
 
@@ -29,6 +30,7 @@ class SocketManager {
   }
 
   public send<T>(event: string, ...data: T[]) {
+    console.log(this._socket);
     this._socket && this._socket.emit(event, data);
   }
 }
